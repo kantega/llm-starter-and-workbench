@@ -1,0 +1,4 @@
+.env
+target/
+html-cache/
+json-api-cache/

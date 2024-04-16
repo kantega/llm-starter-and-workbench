@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.FileSystemDocumentsViewController">
+    <HBox>
+        <TextField fx:id="documentsFolderPath" HBox.hgrow="ALWAYS"/>
+        <Button text="Browse..." onAction="#browseDocumentsFolder"/>
+        <Button text="Load" onAction="#loadDocuments"/>
+    </HBox>
+    <ListView fx:id="fileSystemDocumentsListView" VBox.vgrow="ALWAYS"/>
+</VBox>

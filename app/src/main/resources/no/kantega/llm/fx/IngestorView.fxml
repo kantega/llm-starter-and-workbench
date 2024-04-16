@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.IngestorViewController">
+    <HBox>
+        <TextField fx:id="segmentSizeText" text="300" promptText="Segment size"/>
+        <TextField fx:id="segmentOverlapText" text="20" promptText="Segment overlap"/>
+        <Button fx:id="ingestAction" text="Ingest %s documents with %s" onAction="#handleIngest"/>
+    </HBox>
+    <ListView fx:id="embeddingsListView" VBox.vgrow="ALWAYS"/>
+</VBox>

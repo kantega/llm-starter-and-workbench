@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.ChatModelsViewController">
+    <Label text="Chat models"/>
+    <ListView fx:id="chatModelsListView"/>
+    <Label text="Streaming chat models"/>
+    <ListView fx:id="streamingChatModelsListView"/>
+</VBox>
