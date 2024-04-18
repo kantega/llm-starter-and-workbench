@@ -12,6 +12,10 @@ public class NodeHighlighter {
     public NodeHighlighter(String highightStyle) {
         this.highlightStyle = highightStyle;
     }
+    
+    public void setHighlightStyle(String highlightStyle) {
+        this.highlightStyle = highlightStyle;
+    }
 
     private Map<Node, String> highlightedNodes = new HashMap<>();
 

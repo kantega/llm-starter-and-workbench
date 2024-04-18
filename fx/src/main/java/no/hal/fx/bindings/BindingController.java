@@ -19,6 +19,7 @@ import javafx.scene.paint.Color;
 import javafx.scene.shape.LineTo;
 import javafx.scene.shape.MoveTo;
 import javafx.scene.shape.Path;
+import no.hal.fx.util.Modifiers;
 
 public class BindingController {
     
@@ -61,8 +62,12 @@ public class BindingController {
         bindableView.getBindingTargets().forEach(this::bindToTarget);
     }
 
+    public boolean bindingSourceSupportsTarget(BindingSource<?> bindingSource, BindingTarget<?> bindingTarget) {
+        return bindingSource.sourceClass().isAssignableFrom(bindingTarget.targetClass());
+    }
+
     public void bindSourceToTarget(BindingSource<?> bindingSource, BindingTarget<?> bindingTarget, Path path) {
-        if (! bindingSource.sourceClass().isAssignableFrom(bindingTarget.targetClass())) {
+        if (! bindingSourceSupportsTarget(bindingSource, bindingTarget)) {
             throw new IllegalArgumentException(bindingTarget.targetClass() + " is not assignable to " + bindingSource.sourceClass());
         }
         var subscription = bindingSource.sourceValue().subscribe(value -> {
@@ -97,12 +102,13 @@ public class BindingController {
         bindableView.getBindingTargets().forEach(this::removeBindings);
     }
 
-    private boolean isBindingGestureEvent(MouseEvent event) {
-        return event.isMetaDown();
+    private Modifiers bindingGestureModifiers = Modifiers.of("ALT+META");
+    
+    public void setBindingGestureModifiers(Modifiers modifiers) {
+        this.bindingGestureModifiers = modifiers;
     }
-
-    private boolean isBindingGestureEvent(KeyEvent event) {
-        return event.isMetaDown();
+    public void setBindingGestureModifiers(String modifiers) {
+        setBindingGestureModifiers(Modifiers.of(modifiers));
     }
 
     private boolean isBindingPath(Path path) {
@@ -192,7 +198,7 @@ public class BindingController {
 
         @Override
         public void handle(KeyEvent event) {
-            if (event.getEventType() == KeyEvent.KEY_PRESSED && isBindingGestureEvent(event)) {
+            if (event.getEventType() == KeyEvent.KEY_PRESSED && bindingGestureModifiers.match(event)) {
                 bindingSources.forEach(bindingSource -> sourceHighlighter.highlight(bindingSource.sourceNode()));
                 for (var bs : bindingSubscriptions.keySet()) {
                     var path = bindingSubscriptions.computeIfAbsent(bs, bs2 -> createBindingPath());
@@ -220,7 +226,7 @@ public class BindingController {
 
         @Override
         public void handle(MouseEvent event) {
-            if (! isBindingGestureEvent(event)) {
+            if (! bindingGestureModifiers.match(event)) {
                 this.bindingSource = null;
                 sourceHighlighter.clear();
                 targetHighlighter.clear();
@@ -246,7 +252,8 @@ public class BindingController {
             } else if (this.bindingSource != null && (event.getEventType() == MouseEvent.MOUSE_DRAGGED || event.getEventType() == MouseEvent.MOUSE_RELEASED)) {
                 targetMaybe = bindingTargets.stream()
                     .filter(bindingTarget -> isChildOf(pick.getIntersectedNode(), bindingTarget.targetNode()))
-                    .findAny();
+                    .filter(bindingTarget -> bindingSource != null && bindingSourceSupportsTarget(bindingSource, bindingTarget))
+                    .findFirst();
             }
             if (event.getEventType() == MouseEvent.MOUSE_MOVED) {
                 if (pathMaybe.isPresent()) {
