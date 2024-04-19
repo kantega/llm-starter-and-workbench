@@ -21,6 +21,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
+import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControl;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
@@ -157,6 +158,9 @@ public class RagChatViewController implements BindableView {
                         Platform.runLater(() -> {
                             userMessageText.setText(null);
                             aiMessageText.setText(answer.content().text());
+                            if (aiMessageText instanceof TextArea textArea) {
+                                textArea.setScrollTop(Double.MAX_VALUE);
+                            }
                             chatMemoryUpdated(null);
                         });
                     }

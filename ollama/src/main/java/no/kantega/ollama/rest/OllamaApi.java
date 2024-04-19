@@ -21,7 +21,6 @@ public interface OllamaApi {
         public String baseName() {
             return name.substring(0, name.indexOf(':'));
         }
-
         public String tag() {
             return name.substring(name.indexOf(':') + 1);
         }

@@ -2,7 +2,6 @@ package no.kantega.ollama.fx;
 
 import java.util.List;
 
-import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
 import dev.langchain4j.model.chat.ChatLanguageModel;
@@ -20,9 +19,9 @@ import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.TextArea;
 import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.ChildrenAdapter;
-import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
@@ -34,8 +33,9 @@ public class OllamaChatModelsViewController implements BindableView {
 
     @FXML
     ListView<Object> ollamaModelsListView;
+
     @FXML
-    ListView<Object> streamingChatModelsListView;
+    TextArea ollamaModelDetailsText;
 
     @FXML
     OllamaChatModelViewController ollamaChatModelViewController;
@@ -65,7 +65,16 @@ public class OllamaChatModelsViewController implements BindableView {
     void initialize() {
         this.ollamaModelsListView.setItems(this.ollamaModels);
         AdapterListView.adapt(this.ollamaModelsListView, LabelAdapter.forClass(OllamaApi.Model.class, OllamaApi.Model::name), ChildrenAdapter.forChildren(this.ollamaModels));
-        
+        this.ollamaModelsListView.getSelectionModel().selectedItemProperty().addListener((prop, oldValue, newValue) -> {
+            this.ollamaModelDetailsText.setText("");
+            if (newValue instanceof OllamaApi.Model model) {
+                Platform.runLater(() -> {
+                    var info = ollamaApi.getModelInfo(new OllamaApi.ShowParams(model.name()));
+                    this.ollamaModelDetailsText.setText("%s\n%s".formatted(info.modelfile(), info.details()));
+                });
+            };
+        });
+
         this.bindingSources = List.of(
             new BindingSource<ChatLanguageModel>(this.chatModelAction, ChatLanguageModel.class, chatModelProperty),
             new BindingSource<StreamingChatLanguageModel>(this.streamingChatModelAction, StreamingChatLanguageModel.class, streamingChatModelProperty)

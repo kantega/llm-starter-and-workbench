@@ -4,6 +4,7 @@ import com.panemu.tiwulfx.control.dock.DetachableTabPane;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.event.Event;
 import javafx.fxml.FXML;
 import javafx.scene.control.Menu;
@@ -35,10 +36,5 @@ public class WbController {
         viewManager.setDetachableTabPane(detachableTabPane1);
         viewMenu.getItems().addAll(viewManager.createViewCreationItems("New %s view"));
         viewManager.createInitialViews();
-    }
-    
-    @FXML
-    void newView(Event event) {
-        viewManager.createView(event.getSource(), detachableTabPane1);
     }
 }

@@ -65,9 +65,9 @@ public class ViewManager {
         if (isInstanceId(id) && views.containsKey(id)) {
             throw new IllegalArgumentException("instanceId " + id + " already in use");
         }
-        ViewProvider.Instance instance = viewProvider.createView();
         var n = views.values().stream().filter(vi -> vi.info().equals(viewProvider.getViewInfo())).count();
         String viewTitle = viewProvider.getViewInfo().viewTitle() + " #" + (n + 1);
+        ViewProvider.Instance instance = viewProvider.createView();
         var tab = detachableTabPane.addTab(viewTitle, instance.viewNode());
         var instanceId = (isInstanceId(id) ? id : viewProvider.getViewInfo().viewProviderId() + "#" + n);
         var viewInfo = new ViewInfo(viewProvider.getViewInfo(), instanceId, instance, () -> detachableTabPane.getTabs().remove(tab));
@@ -139,7 +139,8 @@ public class ViewManager {
         return viewProviders.stream()
             .map(viewProvider -> {
                 var menuItem = new MenuItem(textFormat.formatted(viewProvider.getViewInfo().viewTitle()));
-                menuItem.setOnAction(event -> createView(viewProvider.getViewInfo().viewProviderId()));
+                var providerId = viewProvider.getViewInfo().viewProviderId();
+                menuItem.setOnAction(event -> createView(providerId));
                 return menuItem;
             })
             .toList();
