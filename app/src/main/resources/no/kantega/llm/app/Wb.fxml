@@ -17,23 +17,7 @@
     <VBox>
         <MenuBar fx:id="menuBar">
             <menus>
-                <Menu fx:id="viewMenu" mnemonicParsing="true" text="View">
-                    <items>
-                    <!-- <Menu fx:id="newViewMenu" mnemonicParsing="true" text="New...">
-                            <items> -->
-                        <MenuItem fx:id="no_kantega_llm_fx_EmbeddingModelsView" text="Embedding models" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_ChatModelsView" text="Chat models" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_EmbeddingsScoreView" text="Embeddings score" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_ChatMemoryView" text="Chat memory" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_SimpleChatView" text="Simple chat" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_FileSystemDocumentsView" text="File system documents" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_IngestorView" text="Ingestor" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_EmbeddingsSearchView" text="Embeddings search" onAction="#newView"/>
-                        <MenuItem fx:id="no_kantega_llm_fx_RagChatView" text="Rag chat" onAction="#newView"/>
-                            <!-- </items>
-                        </Menu> -->
-                    </items>
-                </Menu>
+                <Menu fx:id="viewMenu" mnemonicParsing="true" text="View"/>
             </menus>
         </MenuBar>
         <StackPane fx:id="bindingControllerRoot">

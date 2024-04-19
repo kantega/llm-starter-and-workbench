@@ -5,8 +5,8 @@
 <?import javafx.scene.layout.VBox?>
 
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.ChatModelsViewController">
-    <Label text="Chat models"/>
-    <ListView fx:id="chatModelsListView"/>
     <Label text="Streaming chat models"/>
     <ListView fx:id="streamingChatModelsListView"/>
+    <Label text="Chat models"/>
+    <ListView fx:id="chatModelsListView"/>
 </VBox>

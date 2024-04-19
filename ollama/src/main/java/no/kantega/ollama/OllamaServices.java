@@ -1,8 +1,9 @@
-package no.kantega.llm.service;
+package no.kantega.ollama;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Function;
 
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 
@@ -14,12 +15,17 @@ import dev.langchain4j.model.ollama.OllamaEmbeddingModel;
 import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import no.kantega.llm.util.LabelMap;
+import no.hal.fx.util.LabelMap;
 
 @ApplicationScoped
 public class OllamaServices {
 
-    String baseUrl = "http://localhost:11434/";
+    @ConfigProperty(name = "quarkus.rest-client.ollama-api.url")
+    String baseUrl;
+
+    public String getBaseUrl() {
+        return baseUrl;
+    }
 
     @ConfigProperty(name = "langchain4j.ollama.chat-model.temperature")
     double temperature;
@@ -54,16 +60,24 @@ public class OllamaServices {
     @ConfigProperty(name = "llmwb.ollama.chat-model.names")
     List<String> chatModelNames;
     
+    public String[] getChatModelNames() {
+        return chatModelNames.toArray(new String[0]);
+    }
+
+    public ChatLanguageModel withChatModelLabel(String modelName, Function<String, ChatLanguageModel> chatModelProvider) {
+        return chatModels.getLabeled(modelName, chatModelProvider);
+    }
+
     @Produces
     List<ChatLanguageModel> getChatLanguageModels() {
         return chatModelNames.stream()
-        .map(modelName -> chatModels.getLabeled(modelName, name -> OllamaChatModel.builder()
+        .map(modelName -> withChatModelLabel(modelName, name -> OllamaChatModel.builder()
         .baseUrl(baseUrl)
         .timeout(timeout)
         .modelName(name)
         .temperature(temperature)
         .build()))
-        .toList();    
+        .toList();
     }
     
     public String getChatModelName(ChatLanguageModel chatModel) {
@@ -75,10 +89,18 @@ public class OllamaServices {
     @ConfigProperty(name = "llmwb.ollama.streaming-chat-model.names")
     Optional<List<String>> streamingChatModelNames;
     
+    public String[] getStreamingChatModelNames() {
+        return streamingChatModelNames.orElse(chatModelNames).toArray(new String[0]);
+    }
+
+    public StreamingChatLanguageModel withStreamingChatModelLabel(String modelName, Function<String, StreamingChatLanguageModel> chatModelProvider) {
+        return streamingChatModels.getLabeled(modelName, chatModelProvider);
+    }
+
     @Produces
     List<StreamingChatLanguageModel> getMistralStreamingChatModel() {
         return streamingChatModelNames.orElse(chatModelNames).stream()
-            .map(modelName -> streamingChatModels.getLabeled(modelName, name -> OllamaStreamingChatModel.builder()
+            .map(modelName -> withStreamingChatModelLabel(modelName, name -> OllamaStreamingChatModel.builder()
             .baseUrl(baseUrl)
             .timeout(timeout)
             .modelName(name)

@@ -28,8 +28,9 @@ public class FxmlViewProvider implements ViewProvider {
     public Instance createView() {
         var fxmlUrl = getClass().getResource(fxmlPath);
         var fxmlLoader = fxmlLoaderProvider.get();
+        fxmlLoader.setLocation(fxmlUrl);
         try {
-            Parent parent = fxmlLoader.load(fxmlUrl.openStream());
+            Parent parent = fxmlLoader.load();
             return new Instance(fxmlLoader.getController(), parent);
         } catch (IOException ioe) {
             throw new RuntimeException(ioe);

@@ -13,6 +13,7 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import javafx.css.Styleable;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
@@ -50,10 +51,16 @@ public class ViewManager {
 
     private Map<String, ViewInfo> views = new HashMap<>();
 
+    private DetachableTabPane detachableTabPane;
+
+    public void setDetachableTabPane(DetachableTabPane detachableTabPane) {
+        this.detachableTabPane = detachableTabPane;
+    }
+
     @Inject
     StoredStateManager stateStorageManager;
 
-    ViewInfo addView(String id, DetachableTabPane detachableTabPane) {
+    ViewInfo addView(String id) {
         ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
         if (isInstanceId(id) && views.containsKey(id)) {
             throw new IllegalArgumentException("instanceId " + id + " already in use");
@@ -102,8 +109,8 @@ public class ViewManager {
         return menuItem;
     }
 
-    public ViewInfo createView(String viewId, DetachableTabPane detachableTabPane) {
-        return addView(viewId, detachableTabPane);
+    public ViewInfo createView(String viewId) {
+        return addView(viewId);
     }
 
     public ViewInfo createView(Object source, DetachableTabPane detachableTabPane) {
@@ -122,9 +129,19 @@ public class ViewManager {
         return id.replace("_", ".");
     }
 
-    public List<ViewInfo> createInitialViews(DetachableTabPane detachableTabPane) {
+    public List<ViewInfo> createInitialViews() {
         return stateStorageManager.getStoredStateIdsForType("view").stream()
-            .map(instanceId -> createView(instanceId, detachableTabPane))
+            .map(instanceId -> createView(instanceId))
+            .toList();
+    }
+
+    public List<MenuItem> createViewCreationItems(String textFormat) {
+        return viewProviders.stream()
+            .map(viewProvider -> {
+                var menuItem = new MenuItem(textFormat.formatted(viewProvider.getViewInfo().viewTitle()));
+                menuItem.setOnAction(event -> createView(viewProvider.getViewInfo().viewProviderId()));
+                return menuItem;
+            })
             .toList();
     }
 }

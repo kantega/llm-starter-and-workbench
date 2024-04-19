@@ -66,11 +66,15 @@ public class ButtonActionProgressHelper {
             labeled.setGraphic(progressIndicator);
         }
         Runnable finishRunnable = resetGraphics;
-        streamingTask.accept(success -> {
-            if (success != null && finishRunnable != null) {
-                Platform.runLater(finishRunnable);
-            }
-            return null;
-        });
+        try {
+            streamingTask.accept(success -> {
+                if (success != null && finishRunnable != null) {
+                    Platform.runLater(finishRunnable);
+                }
+                return null;
+            });
+        } catch (Exception ex) {
+            finishRunnable.run();
+        }
     }
 }

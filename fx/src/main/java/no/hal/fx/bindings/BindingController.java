@@ -49,7 +49,10 @@ public class BindingController {
     private Map<BindingSubscription, Path> bindingSubscriptions = new HashMap<>();
 
     public Optional<BindingSource<?>> findSourceForTarget(BindingTarget<?> bindingTarget) {
-        return bindingSources.stream().filter(bindingSource -> bindingSource.sourceClass() == bindingTarget.targetClass()).findFirst();
+        return bindingSources
+            // reverse, so newly added sources are tried first
+            .reversed().stream()
+            .filter(bindingSource -> bindingSource.sourceClass() == bindingTarget.targetClass()).findFirst();
     }
 
     public boolean bindToTarget(BindingTarget<?> bindingTarget) {

@@ -21,6 +21,7 @@
         <module>fx</module>
         <module>wb</module>
         <module>llm</module>
+        <module>ollama</module>
         <module>app</module>
     </modules>
 

@@ -10,11 +10,11 @@ The scripts give a quick introduction to basic concepts as code, while the workb
 ## Requirements
 
 - [Install jbang](https://www.jbang.dev/documentation/guide/latest/installation.html), e.g. using sdkman.
+    - If you're using VSCode, consider installing the [JBang extensions](https://github.com/jbangdev/jbang-vscode).
 - Get access to LLM services, at least one of the following:
--- Install [ollama](https://ollama.com/), so you can run LLM services locally.
--- Register with an LLM service provider, like [openai](https://platform.openai.com/).
+    - Install [ollama](https://ollama.com/), so you can run LLM services locally.
+    - Register with an LLM service provider, like [openai](https://platform.openai.com/).
 
-If you're using VSCode, consider installing the [JBang extensions](https://github.com/jbangdev/jbang-vscode).
 
 ## JBang scripts
 
@@ -51,9 +51,16 @@ Lists all available embedding models, and the selection may be linked to views t
 <img src="readme-files/embedding-models-view.png" alt="Embedding models view" width="250"/>
 
 #### Chat models view
-Lists all available chat (language) models, with separate lists for ordinary and streaming ones. The selection may be linked to views that need a chat model. Note that currently all chat views use the streaming variant, so select in the corresponding list.
+Lists all available chat (language) models, with separate lists for ordinary and streaming ones.
+The selection may be linked to views that need a chat model. Note that currently all chat views use the streaming variant, so select in the corresponding list.
 
 <img src="readme-files/chat-models-view.png" alt="Chat models view" width="250"/>
+
+#### Ollama chat model view
+Create a new ollama (streaming) chat model with specific attributes. This allows to experiment with different settings, like temperature.
+The view may be linked to views that need a chat model.
+
+<img src="readme-files/ollama-chat-model-view.png" alt="Ollama chat model view" width="200"/>
 
 #### Simple chat view
 Allows to chat with a (streaming) chat language model.

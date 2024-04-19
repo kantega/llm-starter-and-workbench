@@ -1,12 +1,12 @@
-package no.kantega.llm.util;
+package no.hal.fx.util;
 
-import java.util.HashMap;
 import java.util.Map;
+import java.util.WeakHashMap;
 import java.util.function.Function;
 
 public class LabelMap<L, T> implements Function<T, L> {
     
-    private Map<L, T> labels = new HashMap<>();
+    private Map<L, T> labels = new WeakHashMap<>();
 
     public T getLabeled(L label, Function<L, T> creator) {
         return labels.computeIfAbsent(label, creator);

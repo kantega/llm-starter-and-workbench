@@ -5,6 +5,7 @@ import java.io.IOException;
 import io.quarkiverse.fx.FxStartupEvent;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
+import jakarta.inject.Provider;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
@@ -13,12 +14,15 @@ import javafx.stage.Stage;
 public class WbApplicationDelegate {
 
   @Inject
-  FXMLLoader fxmlLoader;
+  Provider<FXMLLoader> fxmlLoaderProvider;
+
+  @Inject
+  WbController wbController;
 
   public void start(@Observes FxStartupEvent fxStartupEvent) throws IOException {
-    var fxmlUrl = getClass().getResource("Wb.fxml");
-    fxmlLoader.setLocation(fxmlUrl);
-    Scene scene = fxmlLoader.load(fxmlUrl.openStream());
+    var fxmlLoader = fxmlLoaderProvider.get();
+    fxmlLoader.setLocation(getClass().getResource("Wb.fxml"));
+    Scene scene = fxmlLoader.load();
     Stage stage = fxStartupEvent.getPrimaryStage();
     stage.setScene(scene);
     stage.setWidth(1400);

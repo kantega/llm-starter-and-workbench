@@ -3,7 +3,6 @@ package no.kantega.llm.service;
 import java.time.Duration;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -19,7 +18,7 @@ import dev.langchain4j.model.openai.OpenAiEmbeddingModel;
 import dev.langchain4j.model.openai.OpenAiStreamingChatModel;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
-import no.kantega.llm.util.LabelMap;
+import no.hal.fx.util.LabelMap;
 
 @ApplicationScoped
 public class OpenAiServices {
