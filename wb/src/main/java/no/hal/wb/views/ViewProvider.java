@@ -8,7 +8,13 @@ public interface ViewProvider {
     
     Instance createView();
     
+    default boolean supportsDuplicate() {
+        return false;
+    }
     default Instance duplicateView(Instance instance) {
+        if (! supportsDuplicate()) {
+            throw new UnsupportedOperationException("Cannot duplicate " + getViewInfo().viewProviderId() + " view");
+        }
         return createView();
     }
     default void dispose(Instance viewInstance) {

@@ -1,10 +1,13 @@
 package no.hal.wb.views;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import com.oracle.graal.enterprise.hotspot.javacodegen.r;
+import com.panemu.tiwulfx.control.dock.DetachableTab;
 import com.panemu.tiwulfx.control.dock.DetachableTabPane;
 
 import jakarta.annotation.PreDestroy;
@@ -14,8 +17,10 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import javafx.application.Platform;
 import javafx.css.Styleable;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import no.hal.wb.storedstate.Configurable;
 import no.hal.wb.storedstate.StoredStateManager;
@@ -60,6 +65,67 @@ public class ViewManager {
     @Inject
     StoredStateManager stateStorageManager;
 
+    private ViewProvider createPlaceholderViewProvider(String instanceId, String viewTitle) {
+        return new ViewProvider() {
+            @Override
+            public Info getViewInfo() {
+                return new Info(instanceId, viewTitle);
+            }
+            @Override
+            public Instance createView() {
+                return new Instance(new Object(), new Label("Loading " + viewTitle + " view..."));
+            }
+            @Override
+            public boolean supportsDuplicate() {
+                return false;
+            }
+            @Override
+            public void dispose(Instance instance) {
+            }
+        };
+    }
+
+    ViewInfo addViewAsync(String id) {
+        ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
+        if (isInstanceId(id) && views.containsKey(id)) {
+            throw new IllegalArgumentException("instanceId " + id + " already in use");
+        }
+        var n = views.values().stream().filter(vi -> vi.info().equals(viewProvider.getViewInfo())).count();
+        String viewTitle = viewProvider.getViewInfo().viewTitle() + " #" + (n + 1);
+        var instanceId = (isInstanceId(id) ? id : viewProvider.getViewInfo().viewProviderId() + "#" + n);
+
+        ViewProvider placeholderViewProvider = createPlaceholderViewProvider(instanceId, viewTitle);
+        var placeholderView = addView(placeholderViewProvider, instanceId, viewTitle);
+        Platform.runLater(() -> {
+            Thread.ofVirtual().start(() -> {
+                addView(viewProvider, instanceId, viewTitle);
+                removeView(placeholderView);
+            });
+        });
+        return placeholderView;
+    }
+
+    private ViewInfo addView(ViewProvider viewProvider, String instanceId, String viewTitle) {
+        ViewProvider.Instance instance = viewProvider.createView();
+        var tab = new DetachableTab(viewTitle, instance.viewNode());
+        var viewInfo = new ViewInfo(viewProvider.getViewInfo(), instanceId, instance, () -> detachableTabPane.getTabs().remove(tab));
+        tab.setOnClosed(event -> removeView(viewInfo));
+        List<MenuItem> contextMenuItems = new ArrayList<>();
+        if (viewProvider.supportsDuplicate()) {
+            contextMenuItems.add(createDuplicateMenuItem(viewInfo, detachableTabPane));
+        }
+        if (! contextMenuItems.isEmpty()) {
+            tab.setContextMenu(new ContextMenu(contextMenuItems.toArray(new MenuItem[0])));
+        }
+        views.put(viewInfo.viewId(), viewInfo);
+        Platform.runLater(() -> {
+            detachableTabPane.getTabs().add(tab);
+            detachableTabPane.getSelectionModel().selectLast();
+            CDI.current().getBeanManager().getEvent().fire(new ViewEvent.Added(viewInfo));
+        });
+        return viewInfo;
+    }
+
     ViewInfo addView(String id) {
         ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
         if (isInstanceId(id) && views.containsKey(id)) {
@@ -67,28 +133,21 @@ public class ViewManager {
         }
         var n = views.values().stream().filter(vi -> vi.info().equals(viewProvider.getViewInfo())).count();
         String viewTitle = viewProvider.getViewInfo().viewTitle() + " #" + (n + 1);
-        ViewProvider.Instance instance = viewProvider.createView();
-        var tab = detachableTabPane.addTab(viewTitle, instance.viewNode());
         var instanceId = (isInstanceId(id) ? id : viewProvider.getViewInfo().viewProviderId() + "#" + n);
-        var viewInfo = new ViewInfo(viewProvider.getViewInfo(), instanceId, instance, () -> detachableTabPane.getTabs().remove(tab));
-        tab.setOnClosed(event -> removeView(viewInfo));
-        tab.setContextMenu(new ContextMenu(
-            createDuplicateMenuItem(viewInfo, detachableTabPane)
-        ));
-        views.put(viewInfo.viewId(), viewInfo);
-        detachableTabPane.getSelectionModel().selectLast();
-        CDI.current().getBeanManager().getEvent().fire(new ViewEvent.Added(viewInfo));
-        return viewInfo;
+
+        return addView(viewProvider, instanceId, viewTitle);
     }
         
     void removeView(ViewInfo viewInfo) {
         findViewProvider(viewInfo.info().viewProviderId())
             .ifPresent(viewProvider -> {
                 views.remove(viewInfo.viewId());
-                viewInfo.disposer().run();
-                viewProvider.dispose(viewInfo.instance());
-                stateStorageManager.removeStoreStateForId(viewInfo.viewId());
-                beanManager.getEvent().fire(new ViewEvent.Removed(viewInfo));
+                Platform.runLater(() -> {
+                    viewInfo.disposer().run();
+                    viewProvider.dispose(viewInfo.instance());
+                    stateStorageManager.removeStoreStateForId(viewInfo.viewId());
+                    beanManager.getEvent().fire(new ViewEvent.Removed(viewInfo));
+                });
             });
     }
 
@@ -140,7 +199,7 @@ public class ViewManager {
             .map(viewProvider -> {
                 var menuItem = new MenuItem(textFormat.formatted(viewProvider.getViewInfo().viewTitle()));
                 var providerId = viewProvider.getViewInfo().viewProviderId();
-                menuItem.setOnAction(event -> createView(providerId));
+                menuItem.setOnAction(event -> addViewAsync(providerId));
                 return menuItem;
             })
             .toList();
