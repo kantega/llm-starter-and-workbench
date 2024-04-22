@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import com.oracle.graal.enterprise.hotspot.javacodegen.r;
 import com.panemu.tiwulfx.control.dock.DetachableTab;
 import com.panemu.tiwulfx.control.dock.DetachableTabPane;
 
@@ -16,12 +15,15 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
-import jakarta.inject.Provider;
 import javafx.application.Platform;
 import javafx.css.Styleable;
+import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.Tab;
+import javafx.scene.layout.Pane;
+import no.hal.fx.util.ActionProgressHelper;
 import no.hal.wb.storedstate.Configurable;
 import no.hal.wb.storedstate.StoredStateManager;
 
@@ -73,7 +75,7 @@ public class ViewManager {
             }
             @Override
             public Instance createView() {
-                return new Instance(new Object(), new Label("Loading " + viewTitle + " view..."));
+                return new Instance(null, new Pane());
             }
             @Override
             public boolean supportsDuplicate() {
@@ -85,7 +87,7 @@ public class ViewManager {
         };
     }
 
-    ViewInfo addViewAsync(String id) {
+    ViewInfo addViewUsingPlaceholder(String id) {
         ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
         if (isInstanceId(id) && views.containsKey(id)) {
             throw new IllegalArgumentException("instanceId " + id + " already in use");
@@ -97,18 +99,25 @@ public class ViewManager {
         ViewProvider placeholderViewProvider = createPlaceholderViewProvider(instanceId, viewTitle);
         var placeholderView = addView(placeholderViewProvider, instanceId, viewTitle);
         Platform.runLater(() -> {
-            Thread.ofVirtual().start(() -> {
-                addView(viewProvider, instanceId, viewTitle);
+            new ActionProgressHelper().performAction(placeholderView.viewItem(), () -> {
+                return addView(viewProvider, instanceId, viewTitle);
+            }, viewInfo -> {
+                removeView(placeholderView);
+            }, ex -> {
                 removeView(placeholderView);
             });
         });
         return placeholderView;
     }
 
+    private void fireViewEvent(ViewEvent event) {
+        beanManager.getEvent().fire(event);
+    }
+
     private ViewInfo addView(ViewProvider viewProvider, String instanceId, String viewTitle) {
         ViewProvider.Instance instance = viewProvider.createView();
         var tab = new DetachableTab(viewTitle, instance.viewNode());
-        var viewInfo = new ViewInfo(viewProvider.getViewInfo(), instanceId, instance, () -> detachableTabPane.getTabs().remove(tab));
+        var viewInfo = new ViewInfo(viewProvider.getViewInfo(), instanceId, instance, tab);
         tab.setOnClosed(event -> removeView(viewInfo));
         List<MenuItem> contextMenuItems = new ArrayList<>();
         if (viewProvider.supportsDuplicate()) {
@@ -121,7 +130,7 @@ public class ViewManager {
         Platform.runLater(() -> {
             detachableTabPane.getTabs().add(tab);
             detachableTabPane.getSelectionModel().selectLast();
-            CDI.current().getBeanManager().getEvent().fire(new ViewEvent.Added(viewInfo));
+            fireViewEvent(new ViewEvent.Added(viewInfo));
         });
         return viewInfo;
     }
@@ -142,12 +151,14 @@ public class ViewManager {
         findViewProvider(viewInfo.info().viewProviderId())
             .ifPresent(viewProvider -> {
                 views.remove(viewInfo.viewId());
-                Platform.runLater(() -> {
-                    viewInfo.disposer().run();
-                    viewProvider.dispose(viewInfo.instance());
-                    stateStorageManager.removeStoreStateForId(viewInfo.viewId());
-                    beanManager.getEvent().fire(new ViewEvent.Removed(viewInfo));
-                });
+                switch (viewInfo.viewItem()) {
+                    case Tab tab -> detachableTabPane.getTabs().remove(tab);
+                    case null, default -> {
+                    }
+                }
+                viewProvider.dispose(viewInfo.instance());
+                stateStorageManager.removeStoreStateForId(viewInfo.viewId());
+                fireViewEvent(new ViewEvent.Removed(viewInfo));
             });
     }
 
@@ -199,7 +210,7 @@ public class ViewManager {
             .map(viewProvider -> {
                 var menuItem = new MenuItem(textFormat.formatted(viewProvider.getViewInfo().viewTitle()));
                 var providerId = viewProvider.getViewInfo().viewProviderId();
-                menuItem.setOnAction(event -> addViewAsync(providerId));
+                menuItem.setOnAction(event -> addViewUsingPlaceholder(providerId));
                 return menuItem;
             })
             .toList();
