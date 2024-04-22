@@ -30,7 +30,7 @@ import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
 import no.hal.fx.bindings.BindingTarget;
-import no.hal.fx.util.ButtonActionProgressHelper;
+import no.hal.fx.util.ActionProgressHelper;
 import no.kantega.llm.fx.FileSystemDocumentsViewController.FileSystemDocuments;
 
 @Dependent
@@ -110,7 +110,7 @@ public class IngestorViewController implements BindableView {
         );
     }
 
-    private ButtonActionProgressHelper buttonActionProgressHelper = new ButtonActionProgressHelper();
+    private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
 
     public record TextSegmentEmbedding(TextSegment textSegment, Embedding embedding) {
     }

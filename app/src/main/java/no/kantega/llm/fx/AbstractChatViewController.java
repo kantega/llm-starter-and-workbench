@@ -9,7 +9,7 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.scene.control.TextArea;
 import javafx.scene.control.TextInputControl;
-import no.hal.fx.util.ButtonActionProgressHelper;
+import no.hal.fx.util.ActionProgressHelper;
 import no.kantega.llm.fx.ChatMemoryViewController.ChatMemoryUpdate;
 
 public abstract class AbstractChatViewController {
@@ -26,7 +26,7 @@ public abstract class AbstractChatViewController {
 
     protected abstract ChatbotAgent getChatbotAgent();
 
-    private ButtonActionProgressHelper buttonActionProgressHelper = new ButtonActionProgressHelper();
+    private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
 
     protected void chatMemoryUpdated(String nextToken) {
         chatMemoryUpdateProperty.setValue(new ChatMemoryUpdate(getChatMemory(), nextToken));

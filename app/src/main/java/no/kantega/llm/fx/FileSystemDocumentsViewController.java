@@ -27,7 +27,7 @@ import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
-import no.hal.fx.util.ButtonActionProgressHelper;
+import no.hal.fx.util.ActionProgressHelper;
 
 @Dependent
 public class FileSystemDocumentsViewController implements BindableView {
@@ -102,7 +102,7 @@ public class FileSystemDocumentsViewController implements BindableView {
         }
     };
 
-    private ButtonActionProgressHelper buttonActionProgressHelper = new ButtonActionProgressHelper();
+    private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
 
     private Alert alert = null;
 

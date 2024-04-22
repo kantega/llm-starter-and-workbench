@@ -133,8 +133,8 @@ public class BindingController {
 
     private <T> T findParent(Node childNode, Class<T> parentClass, Predicate<T> parentTest) {
         while (childNode != null) {
-            if (parentClass.isInstance(childNode) && parentTest.test((T) childNode)) {
-                return (T) childNode;
+            if (parentClass.isInstance(childNode) && parentTest.test(parentClass.cast(childNode))) {
+                return parentClass.cast(childNode);
             }
             childNode = childNode.getParent();
         }

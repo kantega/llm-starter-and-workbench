@@ -38,7 +38,7 @@ public class FxBindings {
     }
 
     public static <T> Function<Object, T> whenInstanceof(Class<T> clazz) {
-        return item -> clazz.isInstance(item) ? (T) item : null;
+        return item -> clazz.isInstance(item) ?clazz.cast(item) : null;
     }
     public static <T> ObservableValue<T> whenInstanceof(ObservableValue<? super T> value, Class<T> clazz) {
         return value.map(whenInstanceof(clazz));
