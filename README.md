@@ -5,7 +5,9 @@ This repo is for getting started with large language models (LLMs) using Langcha
 1. a set of JBang 'scripts' that implement variants of pretty minimal chatbots
 2. a workbench for trying out various components and techniques supported by Langchain4J, such as document 'ingestion', embeddings, chat language models and RAG
 
-The scripts give a quick introduction to basic concepts as code, while the workbench allows playing around more interactively.
+The scripts give a quick introduction to basic concepts as code. Each script can be run with `jbang <path-to-script>`, e.g. `jbang jbang/MinimalChat.java`.
+
+The workbench allows playing around more interactively. Built it with `mvn install` and run with `mvn quarkus:dev -f app` (but note the requirements below).
 
 ## Requirements
 
@@ -14,7 +16,6 @@ The scripts give a quick introduction to basic concepts as code, while the workb
 - Get access to LLM services, at least one of the following:
     - Install [ollama](https://ollama.com/), so you can run LLM services locally.
     - Register with an LLM service provider, like [openai](https://platform.openai.com/).
-
 
 ## JBang scripts
 
@@ -36,10 +37,15 @@ Running `jbang` on any of these will download dependencies, compile the source a
 ## LLM Workbench
 
 The workbench provides a set of *views* that allow you to explore various elements of Langchain4J.
-Initially, there is one tab group, but tabs may be dragged and docked so you can get a layout suitable for your task.
+The views are organised in *tab groups*, initially, only some view are shown, but more may be opened from the **View** menu, and
+the tabs may be dragged and docked so you can get a layout suitable for your task.
+
 Views may be *linked* so one may provide data to another, e.g.
 the selected *embedding model* in the **Embedding models** may be used by the **Embeddings score** view, by linking them together.
 When a view is opened, it is automatically linked to other views that provide data it needs, but you can link or unlink manually, if needed (see below).
+
+The workbench is a [JavaFX](https://openjfx.io/) application built on [Quarkus](https://quarkus.io/).
+Built it with `mvn install` and run with `mvn quarkus:dev -f app`.
 
 ### Views
 
