@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.function.Function;
 
 import javafx.beans.value.ObservableValue;
+import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionModel;
 
 public class FxBindings {
@@ -38,7 +39,7 @@ public class FxBindings {
     }
 
     public static <T> Function<Object, T> whenInstanceof(Class<T> clazz) {
-        return item -> clazz.isInstance(item) ?clazz.cast(item) : null;
+        return item -> clazz.isInstance(item) ? clazz.cast(item) : null;
     }
     public static <T> ObservableValue<T> whenInstanceof(ObservableValue<? super T> value, Class<T> clazz) {
         return value.map(whenInstanceof(clazz));
@@ -46,5 +47,9 @@ public class FxBindings {
 
     public static <T> ObservableValue<T> selectedItemProperty(SelectionModel<?> selectionModel, Class<T> clazz) {
         return selectionModel.selectedItemProperty().map(FxBindings.whenInstanceof(clazz));
+    }
+
+    public static <T> ObservableValue<T> selectedItemProperty(ListView<?> listView, Class<T> clazz) {
+        return selectedItemProperty(listView.getSelectionModel(), clazz);
     }
 }

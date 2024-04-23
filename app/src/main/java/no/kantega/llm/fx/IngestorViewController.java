@@ -21,17 +21,15 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
-import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import no.hal.fx.adapter.AdapterListView;
-import no.hal.fx.adapter.ChildrenAdapter;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
 import no.hal.fx.bindings.BindingTarget;
 import no.hal.fx.util.ActionProgressHelper;
-import no.kantega.llm.fx.FileSystemDocumentsViewController.FileSystemDocuments;
+import no.kantega.llm.fx.UriDocumentsViewController.Documents;
 
 @Dependent
 public class IngestorViewController implements BindableView {
@@ -46,7 +44,7 @@ public class IngestorViewController implements BindableView {
     Button ingestAction;
 
     @Inject
-    Instance<LabelAdapter> labelAdapters;
+    Instance<LabelAdapter<?>> labelAdapters;
 
     private List<BindingTarget<?>> bindingTargets;
 
@@ -62,7 +60,7 @@ public class IngestorViewController implements BindableView {
         return this.bindingSources;
     }
 
-    private Property<FileSystemDocuments> documentsModelProperty = new SimpleObjectProperty<FileSystemDocuments>(new FileSystemDocuments(List.of()));
+    private Property<Documents> documentsModelProperty = new SimpleObjectProperty<Documents>(new Documents(List.of()));
     private Property<EmbeddingModel> embeddingModelProperty = new SimpleObjectProperty<EmbeddingModel>();
 
     public record TextSegmentEmbeddings(EmbeddingModel embeddingModel, List<TextSegmentEmbedding> textSegmentEmbeddings, Object updateKey) {
@@ -72,7 +70,6 @@ public class IngestorViewController implements BindableView {
     }
 
     private Property<TextSegmentEmbeddings> allTextSegmentEmbeddingsProperty = new SimpleObjectProperty<>();
-    private Property<TextSegmentEmbeddings> selectedTextSegmentEmbeddingsProperty = new SimpleObjectProperty<>();
 
     @FXML
     ListView<Object> embeddingsListView;
@@ -80,7 +77,7 @@ public class IngestorViewController implements BindableView {
     @FXML
     void initialize() {
         String ingestActionTextFormat = ingestAction.getText();
-        LabelAdapter labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
+        LabelAdapter<EmbeddingModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
         ingestAction.disableProperty().bind(embeddingModelProperty.map(Objects::isNull));        
         ingestAction.textProperty().bind(Bindings.createStringBinding(() -> {
             var documentCount = documentsModelProperty.getValue().documents().size();
@@ -89,24 +86,17 @@ public class IngestorViewController implements BindableView {
         }, documentsModelProperty, embeddingModelProperty));
 
         allTextSegmentEmbeddingsProperty.subscribe(textSegmentEmbeddings -> {
-            selectedTextSegmentEmbeddingsProperty.setValue(textSegmentEmbeddings);
             embeddingsListView.getItems().setAll(textSegmentEmbeddings != null ? textSegmentEmbeddings.textSegmentEmbeddings() : Collections.emptyList());
         });
 
-        AdapterListView.adapt(this.embeddingsListView, CompositeLabelAdapter.of(this.labelAdapters), ChildrenAdapter.forClass(TextSegmentEmbeddings.class, TextSegmentEmbeddings::textSegmentEmbeddings));
-        this.embeddingsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
-        this.embeddingsListView.getSelectionModel().getSelectedItems().subscribe(() -> {
-            var selection = (List<?>) this.embeddingsListView.getSelectionModel().getSelectedItems();
-            var allTextSegmentEmbeddings = allTextSegmentEmbeddingsProperty.getValue();
-            selectedTextSegmentEmbeddingsProperty.setValue(selection.isEmpty() ? allTextSegmentEmbeddings : new TextSegmentEmbeddings(allTextSegmentEmbeddings.embeddingModel(), (List<TextSegmentEmbedding>) selection));
-        });
+        AdapterListView.adapt(this.embeddingsListView, CompositeLabelAdapter.of(this.labelAdapters));
 
         this.bindingTargets = List.of(
-            new BindingTarget<FileSystemDocuments>(ingestAction, FileSystemDocuments.class, documentsModelProperty),
+            new BindingTarget<Documents>(ingestAction, Documents.class, documentsModelProperty),
             new BindingTarget<EmbeddingModel>(ingestAction, EmbeddingModel.class, embeddingModelProperty)
         );
         this.bindingSources = List.of(
-            new BindingSource<TextSegmentEmbeddings>(this.embeddingsListView, TextSegmentEmbeddings.class, selectedTextSegmentEmbeddingsProperty)
+            new BindingSource<TextSegmentEmbeddings>(this.embeddingsListView, TextSegmentEmbeddings.class, allTextSegmentEmbeddingsProperty)
         );
     }
 

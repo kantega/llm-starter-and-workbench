@@ -6,27 +6,31 @@ import javafx.collections.ObservableList;
 import javafx.scene.control.ListView;
 import no.hal.fx.util.FxUpdater;
 
-public abstract class AdapterListView extends ListView<Object> {
+public abstract class AdapterListView<T, CT> extends ListView<CT> {
     
-    private Consumer<Object> modelSetter;
+    private Consumer<T> modelSetter;
     
-    public AdapterListView(LabelAdapter labelAdapter, ChildrenAdapter childrenAdapter) {
+    public AdapterListView(LabelAdapter<CT> labelAdapter, ChildrenAdapter<T, CT> childrenAdapter) {
         modelSetter = adapt(this, labelAdapter, childrenAdapter);
     }
 
-    public static Consumer<Object> adapt(ListView<Object> listView, LabelAdapter labelAdapter, ChildrenAdapter childrenAdapter) {
-        return adapt(listView, listView.getItems(), labelAdapter, childrenAdapter);
+    public static <CT> void adapt(ListView<CT> listView, LabelAdapter<CT> labelAdapter) {
+        listView.setCellFactory(lv -> new LabelAdapterListCell<>(new LabelAdapterListCellHelper<>(labelAdapter)));
     }
 
-    private static Consumer<Object> adapt(ListView<Object> listView, ObservableList<Object> items, LabelAdapter labelAdapter, ChildrenAdapter childrenAdapter) {
-        listView.setCellFactory(lv -> new LabelAdapterListCell<>(new LabelAdapterListCellHelper<>(labelAdapter)));
+    public static <T, CT> Consumer<T> adapt(ListView<CT> listView, LabelAdapter<CT> labelAdapter, ChildrenAdapter<T, CT> childrenAdapter) {
+        return adapt(listView, labelAdapter, listView.getItems(), childrenAdapter);
+    }
+
+    private static <T, CT> Consumer<T> adapt(ListView<CT> listView, LabelAdapter<CT> labelAdapter, ObservableList<CT> items, ChildrenAdapter<T, CT> childrenAdapter) {
+        adapt(listView, labelAdapter);
         return model -> {
             var children = childrenAdapter.getChildren(model);
             FxUpdater.update(items::setAll, children);
         };
     }
 
-    public void setModel(Object model) {
+    public void setModel(T model) {
         modelSetter.accept(model);
     }
 }

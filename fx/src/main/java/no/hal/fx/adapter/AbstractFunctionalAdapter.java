@@ -12,6 +12,6 @@ public class AbstractFunctionalAdapter<T, R> extends AbstractSimpleAdapter<T> {
     }
 
     protected R apply(Object o) {
-        return isFor(o) ? fun.apply(clazz.cast(o)) : null;
+        return isFor(o) ? fun.apply((T) o) : null;
     }
 }

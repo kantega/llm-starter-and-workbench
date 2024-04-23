@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.UriDocumentsViewController">
+    <HBox>
+        <TextField fx:id="uriText" promptText="&lt;uri&gt;" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="scanForUrisAction" text="Scan" onAction="#scanForUris"/>
+        <Button text="Folder..." onAction="#browseDocumentsFolder"/>
+    </HBox>
+    <HBox>
+        <Label text="Filter path and/or extension: "/>
+        <TextField fx:id="pathFilterText" promptText="&lt;path filter&gt;" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="extensionFilterText" promptText="&lt;extension filter&gt;"/>
+    </HBox>
+    <ListView fx:id="uriListView"/>
+    <Button text="Load" onAction="#loadDocuments"/>
+    <ListView fx:id="documentListView" VBox.vgrow="ALWAYS"/>
+</VBox>

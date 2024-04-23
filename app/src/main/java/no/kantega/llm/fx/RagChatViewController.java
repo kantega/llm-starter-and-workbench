@@ -64,7 +64,7 @@ public class RagChatViewController extends AbstractChatViewController implements
     }
 
     @Inject
-    Instance<LabelAdapter> labelAdapters;
+    Instance<LabelAdapter<?>> labelAdapters;
 
     private Property<StreamingChatLanguageModel> chatModelProperty = new SimpleObjectProperty<StreamingChatLanguageModel>();
         
@@ -121,7 +121,7 @@ public class RagChatViewController extends AbstractChatViewController implements
         systemPromptText.textProperty().subscribe(text -> handleRestartChat());
 
         String sendUserMessageActionTextFormat = sendUserMessageAction.getText();
-        LabelAdapter labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
+        LabelAdapter<StreamingChatLanguageModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
         sendUserMessageAction.disableProperty().bind(chatModelProperty.map(Objects::isNull));
         var computedLabelValue = chatModelProperty.map(cm -> sendUserMessageActionTextFormat.formatted(labelAdapter.getText(cm)));
         sendUserMessageAction.textProperty().bind(computedLabelValue.orElse(sendUserMessageActionTextFormat.formatted("?")));
@@ -148,6 +148,8 @@ public class RagChatViewController extends AbstractChatViewController implements
 
     @FXML
     void handleRestartChat() {
+        userMessageText.setText("");
+        aiMessageText.setText("");
         chatMemory.clear();
         chatMemory.add(new SystemMessage(systemPromptText.getText()));
         chatMemoryUpdated(null);

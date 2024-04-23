@@ -8,7 +8,6 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -26,9 +25,9 @@ import no.hal.wb.storedstate.Configurable;
 public class EmbeddingModelsViewController implements BindableView, Configurable {
 
     @FXML
-    ListView<Object> embeddingModelsListView;
+    ListView<EmbeddingModel> embeddingModelsListView;
 
-    private ObservableList<Object> embeddingModels = FXCollections.observableArrayList();
+    private ObservableList<EmbeddingModel> embeddingModels = FXCollections.observableArrayList();
 
     @Inject
     void setEmbeddingModels(Instance<List<EmbeddingModel>> embeddingModels) {
@@ -36,7 +35,7 @@ public class EmbeddingModelsViewController implements BindableView, Configurable
     }
 
     @Inject
-    Instance<LabelAdapter> labelAdapters;
+    Instance<LabelAdapter<?>> labelAdapters;
 
     private List<BindingSource<?>> bindingSources;
 
@@ -50,9 +49,8 @@ public class EmbeddingModelsViewController implements BindableView, Configurable
         this.embeddingModelsListView.setItems(this.embeddingModels);
         AdapterListView.adapt(this.embeddingModelsListView, CompositeLabelAdapter.of(this.labelAdapters), ChildrenAdapter.forChildren(this.embeddingModels));
 
-        ObservableValue<EmbeddingModel> embeddingModelProperty = FxBindings.selectedItemProperty(embeddingModelsListView.getSelectionModel(), EmbeddingModel.class);
         this.bindingSources = List.of(
-            new BindingSource<EmbeddingModel>(this.embeddingModelsListView, EmbeddingModel.class, embeddingModelProperty)
+            new BindingSource<EmbeddingModel>(this.embeddingModelsListView, EmbeddingModel.class, FxBindings.selectedItemProperty(embeddingModelsListView, EmbeddingModel.class))
         );
     }
 

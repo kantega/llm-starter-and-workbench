@@ -7,7 +7,6 @@ import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
@@ -23,25 +22,25 @@ import no.hal.fx.bindings.FxBindings;
 @Dependent
 public class ChatModelsViewController implements BindableView {
 
+    // @FXML
+    // ListView<ChatLanguageModel> chatModelsListView;
     @FXML
-    ListView<Object> chatModelsListView;
-    @FXML
-    ListView<Object> streamingChatModelsListView;
+    ListView<StreamingChatLanguageModel> streamingChatModelsListView;
 
-    private ObservableList<Object> chatModels = FXCollections.observableArrayList();
-    private ObservableList<Object> streamingChatModels = FXCollections.observableArrayList();
+    // private ObservableList<ChatLanguageModel> chatModels = FXCollections.observableArrayList();
+    private ObservableList<StreamingChatLanguageModel> streamingChatModels = FXCollections.observableArrayList();
 
-    @Inject
-    void setChatModels(Instance<List<ChatLanguageModel>> chatModels) {
-        FxBindings.addAll(this.chatModels, chatModels.stream().flatMap(List::stream).toList());
-    }
+    // @Inject
+    // void setChatModels(Instance<List<ChatLanguageModel>> chatModels) {
+    //     FxBindings.addAll(this.chatModels, chatModels.stream().flatMap(List::stream).toList());
+    // }
     @Inject
     void setStreamingChatModels(Instance<List<StreamingChatLanguageModel>> streamingChatModels) {
         FxBindings.addAll(this.streamingChatModels, streamingChatModels.stream().flatMap(List::stream).toList());
     }
 
     @Inject
-    Instance<LabelAdapter> labelAdapters;
+    Instance<LabelAdapter<?>> labelAdapters;
 
     private List<BindingSource<?>> bindingSources;
 
@@ -52,18 +51,15 @@ public class ChatModelsViewController implements BindableView {
 
     @FXML
     void initialize() {
-        this.chatModelsListView.setItems(this.chatModels);
-        AdapterListView.adapt(this.chatModelsListView, CompositeLabelAdapter.of(this.labelAdapters), ChildrenAdapter.forChildren(this.chatModels));
+        // this.chatModelsListView.setItems(this.chatModels);
+        // AdapterListView.adapt(this.chatModelsListView, CompositeLabelAdapter.of(this.labelAdapters), ChildrenAdapter.forChildren(this.chatModels));
 
         this.streamingChatModelsListView.setItems(this.streamingChatModels);
         AdapterListView.adapt(this.streamingChatModelsListView, CompositeLabelAdapter.of(this.labelAdapters), ChildrenAdapter.forChildren(this.streamingChatModels));
         
-        ObservableValue<ChatLanguageModel> chatModelProperty = FxBindings.selectedItemProperty(chatModelsListView.getSelectionModel(), ChatLanguageModel.class);
-        ObservableValue<StreamingChatLanguageModel> streamingChatModelProperty = FxBindings.selectedItemProperty(streamingChatModelsListView.getSelectionModel(), StreamingChatLanguageModel.class);
-
         this.bindingSources = List.of(
-            new BindingSource<ChatLanguageModel>(this.chatModelsListView, ChatLanguageModel.class, chatModelProperty),
-            new BindingSource<StreamingChatLanguageModel>(this.streamingChatModelsListView, StreamingChatLanguageModel.class, streamingChatModelProperty)
+            // new BindingSource<ChatLanguageModel>(this.chatModelsListView, ChatLanguageModel.class, FxBindings.selectedItemProperty(chatModelsListView, ChatLanguageModel.class)),
+            new BindingSource<StreamingChatLanguageModel>(this.streamingChatModelsListView, StreamingChatLanguageModel.class, FxBindings.selectedItemProperty(streamingChatModelsListView, StreamingChatLanguageModel.class))
         );
     }
 }

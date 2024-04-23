@@ -14,14 +14,11 @@ import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import no.hal.fx.adapter.AdapterListView;
-import no.hal.fx.adapter.ChildrenAdapter;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
@@ -38,7 +35,7 @@ public class EmbeddingsSearchViewController implements BindableView {
     Button embeddingsSearchAction;
 
     @Inject
-    Instance<LabelAdapter> labelAdapters;
+    Instance<LabelAdapter<?>> labelAdapters;
 
     private List<BindingTarget<?>> bindingTargets;
 
@@ -50,20 +47,17 @@ public class EmbeddingsSearchViewController implements BindableView {
     private Property<TextSegmentEmbeddings> textSegmentEmbeddingsProperty = new SimpleObjectProperty<TextSegmentEmbeddings>();
 
     @FXML
-    ListView<Object> matchesListView;
-
-    private ObservableList<Object> matchesList = FXCollections.observableArrayList();
+    ListView<EmbeddingMatch<TextSegment>> matchesListView;
 
     @FXML
     void initialize() {
         String embeddingsScoreActionTextFormat = embeddingsSearchAction.getText();
-        LabelAdapter labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
+        LabelAdapter<EmbeddingModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
         embeddingsSearchAction.disableProperty().bind(textSegmentEmbeddingsProperty.map(Objects::isNull));
         var computedLabelValue = textSegmentEmbeddingsProperty.map(tse -> embeddingsScoreActionTextFormat.formatted(labelAdapter.getText(tse.embeddingModel())));
         embeddingsSearchAction.textProperty().bind(computedLabelValue.orElse(embeddingsScoreActionTextFormat.formatted("?")));
 
-        this.matchesListView.setItems(this.matchesList);
-        AdapterListView.adapt(this.matchesListView, CompositeLabelAdapter.of(this.labelAdapters), ChildrenAdapter.forChildren(matchesList));
+        AdapterListView.adapt(this.matchesListView, CompositeLabelAdapter.of(this.labelAdapters));
 
         this.bindingTargets = List.of(
             new BindingTarget<TextSegmentEmbeddings>(embeddingsSearchAction, TextSegmentEmbeddings.class, textSegmentEmbeddingsProperty)

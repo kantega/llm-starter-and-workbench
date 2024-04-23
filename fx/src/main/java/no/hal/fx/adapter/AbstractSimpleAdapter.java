@@ -1,6 +1,6 @@
 package no.hal.fx.adapter;
 
-public class AbstractSimpleAdapter<T> implements Adapter<Object> {
+public class AbstractSimpleAdapter<T> {
 
     protected final Class<T> clazz;
     protected final T t;
@@ -10,13 +10,7 @@ public class AbstractSimpleAdapter<T> implements Adapter<Object> {
         this.t = t;
     }
 
-    @Override
-    public Class<?> forClass() {
-        return clazz != null ? clazz : Object.class;
-    }
-
-    @Override
     public boolean isFor(Object o) {
-        return clazz.isInstance(o) && (t == null || o == t);
+        return (clazz == null || clazz.isInstance(o)) && (t == null || o == t);
     }
 }

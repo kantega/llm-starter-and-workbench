@@ -20,12 +20,10 @@
     <tabs>
         <Tab text="Chat">
             <VBox>
+                <TextArea fx:id="userMessageText" prefRowCount="3"/>
                 <HBox>
-                    <TextArea fx:id="userMessageText" prefRowCount="3"/>
-                    <VBox>
-                        <Button fx:id="sendUserMessageAction" text="Send to %s" onAction="#handleSendUserMessage"/>
-                        <Button text="Restart chat" onAction="#handleRestartChat"/>
-                    </VBox>
+                    <Button fx:id="sendUserMessageAction" text="Send to %s" onAction="#handleSendUserMessage"/>
+                    <Button text="Restart chat" onAction="#handleRestartChat"/>
                 </HBox>
                 <ScrollPane hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
                     <TextArea fx:id="aiMessageText" wrapText="true"/>

@@ -21,7 +21,6 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.TextArea;
 import no.hal.fx.adapter.AdapterListView;
-import no.hal.fx.adapter.ChildrenAdapter;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
@@ -40,7 +39,7 @@ public class EmbeddingsScoreViewController implements BindableView {
     Button embeddingsScoreAction;
 
     @Inject
-    Instance<LabelAdapter> labelAdapters;
+    Instance<LabelAdapter<?>> labelAdapters;
 
     private List<BindingTarget<?>> bindingTargets;
 
@@ -52,22 +51,20 @@ public class EmbeddingsScoreViewController implements BindableView {
     private Property<EmbeddingModel> embeddingModelProperty = new SimpleObjectProperty<EmbeddingModel>();
 
     @FXML
-    ListView<Object> matchesListView;
+    ListView<EmbeddingMatch<TextSegment>> matchesListView;
 
-    private EmbeddingStore<TextSegment> embeddingStore;
-
-    private ObservableList<Object> matchesList = FXCollections.observableArrayList();
+    private ObservableList<EmbeddingMatch<TextSegment>> matchesList = FXCollections.observableArrayList();
 
     @FXML
     void initialize() {
         String embeddingsScoreActionTextFormat = embeddingsScoreAction.getText();
-        LabelAdapter labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
+        LabelAdapter<EmbeddingModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
         embeddingsScoreAction.disableProperty().bind(embeddingModelProperty.map(Objects::isNull));
         var computedLabelValue = embeddingModelProperty.map(em -> embeddingsScoreActionTextFormat.formatted(labelAdapter.getText(em)));
         embeddingsScoreAction.textProperty().bind(computedLabelValue.orElse(embeddingsScoreActionTextFormat.formatted("?")));
 
         this.matchesListView.setItems(this.matchesList);
-        AdapterListView.adapt(this.matchesListView, CompositeLabelAdapter.of(this.labelAdapters), ChildrenAdapter.forChildren(matchesList));
+        AdapterListView.adapt(this.matchesListView, CompositeLabelAdapter.of(this.labelAdapters));
 
         this.bindingTargets = List.of(
             new BindingTarget<EmbeddingModel>(embeddingsScoreAction, EmbeddingModel.class, embeddingModelProperty)
@@ -79,7 +76,7 @@ public class EmbeddingsScoreViewController implements BindableView {
         EmbeddingModel embeddingModel = embeddingModelProperty.getValue();
         TextSegment ts1 = TextSegment.from(embeddingsText1.getText());
         Embedding embedding1 = embeddingModel.embed(ts1).content();
-        embeddingStore = new InMemoryEmbeddingStore<>();
+        EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
         var lines = embeddingsText2.getText().split("\n");
         for (var line : lines) {
             TextSegment ts2 = TextSegment.from(line);

@@ -33,6 +33,8 @@ public class FxmlViewProvider implements ViewProvider {
             Parent parent = fxmlLoader.load();
             return new Instance(fxmlLoader.getController(), parent);
         } catch (IOException ioe) {
+            System.err.println("Error loading " + fxmlUrl + ": " + ioe);
+            ioe.printStackTrace();
             throw new RuntimeException(ioe);
         }
     }

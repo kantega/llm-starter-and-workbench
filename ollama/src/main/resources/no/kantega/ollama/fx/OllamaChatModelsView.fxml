@@ -14,8 +14,10 @@
         <TextArea fx:id="ollamaModelDetailsText"/>
     </HBox>
     <HBox>
+    <!--
         <Button fx:id="chatModelAction" text="Chat model" onAction="#createAndUpdateChatModel"/>
-        <Button fx:id="streamingChatModelAction" text="Streaming chat model" onAction="#createAndUpdateStreamingChatModel"/>
+     -->
+        <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createAndUpdateStreamingChatModel"/>
     </HBox>
     <fx:include fx:id="ollamaChatModelView" source="OllamaChatModelView.fxml"/>
 </VBox>

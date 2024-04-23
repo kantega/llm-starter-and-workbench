@@ -7,33 +7,36 @@ import java.util.function.Function;
 
 import no.hal.fx.bindings.FxBindings;
 
-@FunctionalInterface
-public interface ChildrenAdapter extends Adapter<Object> {
+public interface ChildrenAdapter<T, CT> extends Adapter<T> {
     
-    @Override
-    default Class<? extends Object> forClass() {
-        return Object.class;
-    }
+    List<CT> getChildren(T t);
 
-    List<? extends Object> getChildren(Object o);
-
-    public static <T, CT> ChildrenAdapter forClass(Class<T> clazz, Function<T, List<CT>> childrenFun) {
+    public static <T, CT> ChildrenAdapter<T, CT> forClass(Class<T> clazz, Function<T, List<CT>> childrenFun) {
         return new SimpleChildrenAdapter<T, CT>(clazz, null, childrenFun);
     }
-    public static <T, CT> ChildrenAdapter forInstance(T t, Function<T, List<CT>> childrenFun) {
-        return new SimpleChildrenAdapter<T, CT>((Class<T>) t.getClass(), t, childrenFun);
+    public static <T, CT> ChildrenAdapter<T, CT> forInstance(T t, Function<T, List<CT>> childrenFun) {
+        return new SimpleChildrenAdapter<T, CT>(null, t, childrenFun);
     }
-    public static <T, CT> ChildrenAdapter forInstance(T t, List<CT> children) {
+    public static <T, CT> ChildrenAdapter<T, CT> forInstance(T t, List<CT> children) {
         return forInstance(t, it -> children);
     }
-    public static <CT> ChildrenAdapter forChildren(Iterator<CT> children) {
+    public static <T, CT> ChildrenAdapter<T, CT> forChildren(Iterator<CT> children) {
         List<CT> childList = FxBindings.listOf(children);
-        return it -> childList;
+        return new ChildrenAdapter<T,CT>() {
+            @Override
+            public List<CT> getChildren(T t) {
+                return childList;
+            }
+            @Override
+            public boolean isFor(Object o) {
+                return true;
+            }
+        };
     }
-    public static <CT> ChildrenAdapter forChildren(Iterable<CT> children) {
+    public static <CT> ChildrenAdapter<?, CT> forChildren(Iterable<CT> children) {
         return forChildren(children.iterator());
     }
-    public static <CT> ChildrenAdapter empty() {
+    public static <CT> ChildrenAdapter<?, CT> empty() {
         return forChildren(Collections.emptyList());
     }
 }

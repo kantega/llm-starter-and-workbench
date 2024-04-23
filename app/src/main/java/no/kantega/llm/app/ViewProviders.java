@@ -45,6 +45,10 @@ public class ViewProviders {
     ViewProvider fileSystemDocumentsView() throws IOException {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.FileSystemDocumentsView", "File system documents"), fxmlLoaderProvider, "/no/kantega/llm/fx/FileSystemDocumentsView.fxml");
     }
+    @Produces
+    ViewProvider uriDocumentsView() throws IOException {
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.UriDocumentsView", "Uri documents"), fxmlLoaderProvider, "/no/kantega/llm/fx/UriDocumentsView.fxml");
+    }
 
     @Produces
     ViewProvider ingestorView() throws IOException {

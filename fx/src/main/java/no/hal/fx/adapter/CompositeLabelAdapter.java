@@ -6,35 +6,43 @@ import java.util.Iterator;
 import javafx.scene.image.Image;
 import no.hal.fx.bindings.FxBindings;
 
-public class CompositeLabelAdapter extends CompositeAdapter<LabelAdapter> implements LabelAdapter {
+public class CompositeLabelAdapter<T> extends CompositeAdapter<LabelAdapter<?>> implements LabelAdapter<T> {
 
-    private CompositeLabelAdapter(Collection<LabelAdapter> labelAdapters) {
+    private CompositeLabelAdapter(Collection<LabelAdapter<?>> labelAdapters) {
         super(labelAdapters);
     }
-    private CompositeLabelAdapter(LabelAdapter... labelAdapters) {
+    private CompositeLabelAdapter(LabelAdapter<?>... labelAdapters) {
         super(labelAdapters);
     }
     
-    public static CompositeLabelAdapter of(Iterable<LabelAdapter> labelAdapters) {
-        return new CompositeLabelAdapter(FxBindings.listOf(labelAdapters));
+    public static <T> CompositeLabelAdapter<T> of(Iterable<LabelAdapter<?>> labelAdapters) {
+        return new CompositeLabelAdapter<T>(FxBindings.listOf(labelAdapters));
     }
-    public static CompositeLabelAdapter of(LabelAdapter... labelAdapters) {
-        return new CompositeLabelAdapter(labelAdapters);
+    public static <T> CompositeLabelAdapter<T> of(LabelAdapter<?>... labelAdapters) {
+        return new CompositeLabelAdapter<T>(labelAdapters);
     }
-    public static CompositeLabelAdapter of(Iterator<LabelAdapter> labelAdapters) {
-        return new CompositeLabelAdapter(FxBindings.listOf(labelAdapters));
-    }
-
-    @Override
-    public String getText(Object o) {
-        return getFirst(o, adapter -> adapter.getText(o)).orElse(o.toString());
+    public static <T> CompositeLabelAdapter<T> of(Iterator<LabelAdapter<?>> labelAdapters) {
+        return new CompositeLabelAdapter<T>(FxBindings.listOf(labelAdapters));
     }
 
     @Override
-    public Image getImage(Object o) {
+    public String getText(T t) {
         for (var labelAdapter : adapters) {
-            if (labelAdapter.isFor(o)) {
-                var image = labelAdapter.getImage(o);
+            if (labelAdapter.isFor(t)) {
+                String text = ((LabelAdapter) labelAdapter).getText(t);
+                if (text != null) {
+                    return text;
+                }
+            }
+        }
+        return null;
+    }
+
+    @Override
+    public Image getImage(T t) {
+        for (var labelAdapter : adapters) {
+            if (labelAdapter.isFor(t)) {
+                var image = ((LabelAdapter) labelAdapter).getImage(t);
                 if (image != null) {
                     return image;
                 }

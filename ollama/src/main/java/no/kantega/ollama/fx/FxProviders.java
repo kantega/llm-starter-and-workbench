@@ -18,24 +18,24 @@ public class FxProviders {
     OllamaServices ollamaServices;
 
     @Produces
-    LabelAdapter labelAdapterForOllamaEmbeddingModel() {
+    LabelAdapter<OllamaEmbeddingModel> labelAdapterForOllamaEmbeddingModel() {
         return LabelAdapter.forClass(OllamaEmbeddingModel.class, em -> "Ollama %s embedding model".formatted(ollamaServices.getEmbeddingModelName(em)));
     }
     @Produces
-    LabelAdapter labelAdapterForOllamaChatModel() {
+    LabelAdapter<OllamaChatModel> labelAdapterForOllamaChatModel() {
         return LabelAdapter.forClass(OllamaChatModel.class, cm -> "Ollama %s chat model".formatted(ollamaServices.getChatModelName(cm)));
     }
     @Produces
-    LabelAdapter labelAdapterForOllamaStreamingChatModel() {
+    LabelAdapter<OllamaStreamingChatModel> labelAdapterForOllamaStreamingChatModel() {
         return LabelAdapter.forClass(OllamaStreamingChatModel.class, cm -> "Ollama %s streaming chat model".formatted(ollamaServices.getStreamingChatModelName(cm)));
     }
 
     @Produces
-    LabelAdapter labelAdapterForOllamaModel() {
+    LabelAdapter<OllamaApi.Model> labelAdapterForOllamaModel() {
         return LabelAdapter.forClass(OllamaApi.Model.class, m -> "Ollama %s model".formatted(m.name()));
     }
     @Produces
-    ChildrenAdapter childrenAdapterForOllamaModels() {
+    ChildrenAdapter<OllamaApi.Models, OllamaApi.Model> childrenAdapterForOllamaModels() {
         return ChildrenAdapter.forClass(OllamaApi.Models.class, OllamaApi.Models::models);
     }
 }

@@ -13,19 +13,24 @@ import jakarta.annotation.PreDestroy;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Instance;
 import jakarta.enterprise.inject.spi.BeanManager;
-import jakarta.enterprise.inject.spi.CDI;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.css.Styleable;
-import javafx.scene.control.ContentDisplay;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.Label;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.Pane;
 import no.hal.fx.util.ActionProgressHelper;
 import no.hal.wb.storedstate.Configurable;
 import no.hal.wb.storedstate.StoredStateManager;
+
+/*
+ * Based on https://github.com/panemu/tiwulfx-dock
+ * 
+ * Also consider
+ * - https://github.com/alexbodogit/AnchorFX
+ * - https://github.com/RobertBColton/DockFX
+ */
 
 @ApplicationScoped
 public class ViewManager {
@@ -104,6 +109,7 @@ public class ViewManager {
             }, viewInfo -> {
                 removeView(placeholderView);
             }, ex -> {
+                System.err.println("Error creating " + id + " view: " + ex);
                 removeView(placeholderView);
             });
         });

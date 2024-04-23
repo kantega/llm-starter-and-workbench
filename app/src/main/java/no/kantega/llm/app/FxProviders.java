@@ -22,7 +22,7 @@ public class FxProviders {
 
     private String textSegmentString(String prefix, TextSegment textSegment) {
         var metadata = textSegment.metadata();
-        var source = metadata.get("file_name");
+        var source = metadata.get(Document.FILE_NAME);
         if (source != null) {
             return "%s%s #%s\n%s".formatted(prefix, source, metadata.get("index"), textSegment.text());
         } else if (prefix.isEmpty()) {
@@ -33,39 +33,43 @@ public class FxProviders {
     }
 
     @Produces
-    LabelAdapter labelAdapterForTextSegmentEmbedding() {
+    LabelAdapter<TextSegmentEmbedding> labelAdapterForTextSegmentEmbedding() {
         return LabelAdapter.forClass(TextSegmentEmbedding.class, tse -> textSegmentString("", tse.textSegment()));
     }
     
     @Produces
-    LabelAdapter labelAdapterForEmbeddingMatch() {
+    LabelAdapter<EmbeddingMatch> labelAdapterForEmbeddingMatch() {
         return LabelAdapter.forClass(EmbeddingMatch.class, match -> {
             return textSegmentString("%.2f: ".formatted(match.score()), (TextSegment) match.embedded());
         });
     }
 
     @Produces
-    LabelAdapter labelAdapterForDocument() {
-        return LabelAdapter.forClass(Document.class, document ->
-            "%s: %s characters".formatted(document.metadata().get("file_name"), document.text().length())
-        );
+    LabelAdapter<Document> labelAdapterForDocument() {
+        return LabelAdapter.forClass(Document.class, document -> {
+            String source = document.metadata().get(Document.FILE_NAME);
+            if (source == null) {
+                source = document.metadata().get(Document.URL);
+            }
+            return "%s: %s characters".formatted(source, document.text().length());
+        });
     }
 
     @Produces
-    LabelAdapter labelAdapterForAllMiniLmL6V2EmbeddingModel() {
+    LabelAdapter<AllMiniLmL6V2EmbeddingModel> labelAdapterForAllMiniLmL6V2EmbeddingModel() {
         return LabelAdapter.forClass(AllMiniLmL6V2EmbeddingModel.class, ignore -> "Default in-memory embedding model");
     }
 
     @Produces
-    LabelAdapter labelAdapterForOpenAiEmbeddingModel() {
+    LabelAdapter<OpenAiEmbeddingModel> labelAdapterForOpenAiEmbeddingModel() {
         return LabelAdapter.forClass(OpenAiEmbeddingModel.class, ignore -> "OpenAi's embedding model");
     }
     @Produces
-    LabelAdapter labelAdapterForOpenAiChatModel() {
+    LabelAdapter<OpenAiChatModel> labelAdapterForOpenAiChatModel() {
         return LabelAdapter.forClass(OpenAiChatModel.class, cm -> "OpenAi %s chat model".formatted(openAiServices.getChatModelName(cm)));
     }
     @Produces
-    LabelAdapter labelAdapterForOpenAiStreamingChatModel() {
+    LabelAdapter<OpenAiStreamingChatModel> labelAdapterForOpenAiStreamingChatModel() {
         return LabelAdapter.forClass(OpenAiStreamingChatModel.class, cm -> "OpenAi %s streaming chat model".formatted(openAiServices.getStreamingChatModelName(cm)));
     }
 }
