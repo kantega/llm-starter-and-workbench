@@ -19,6 +19,6 @@
         <TextField fx:id="extensionFilterText" promptText="&lt;extension filter&gt;"/>
     </HBox>
     <ListView fx:id="uriListView"/>
-    <Button text="Load" onAction="#loadDocuments"/>
+    <Button fx:id="loadDocumentsAction" text="Load %s documents" onAction="#loadDocuments"/>
     <ListView fx:id="documentListView" VBox.vgrow="ALWAYS"/>
 </VBox>

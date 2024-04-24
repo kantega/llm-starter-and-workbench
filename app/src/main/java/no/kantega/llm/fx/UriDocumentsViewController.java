@@ -8,9 +8,13 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
+import java.util.concurrent.CountDownLatch;
 
+import org.jboss.logging.Logger;
 import org.jsoup.Jsoup;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
@@ -24,6 +28,7 @@ import io.github.furstenheim.CopyDown;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.collections.ObservableList;
@@ -59,6 +64,9 @@ public class UriDocumentsViewController implements BindableView {
     @FXML
     ListView<URI> uriListView;
 
+    @FXML
+    Button loadDocumentsAction;
+
     private FilteredList<URI> filteredUris;
     private ObservableList<URI> allUris;
 
@@ -88,6 +96,8 @@ public class UriDocumentsViewController implements BindableView {
         allUris = uriListView.getItems();
         filteredUris = new FilteredList<>(allUris);
         uriListView.setItems(filteredUris);
+        String loadDocumentsActionFormat = loadDocumentsAction.getText();
+        filteredUris.subscribe(() -> loadDocumentsAction.setText(loadDocumentsActionFormat.formatted(filteredUris.size())));
         AdapterListView.adapt(this.uriListView, uri -> {
             var baseUriString = getUri(uriText.getText()).toString();
             var uriString = uri.toString();
@@ -103,6 +113,7 @@ public class UriDocumentsViewController implements BindableView {
         this.bindingSources = List.of(
             new BindingSource<Documents>(this.documentListView, Documents.class, uriDocumentsProperty)
         );
+        updateUriList();
     }
 
     private void updateUriList() {
@@ -124,6 +135,9 @@ public class UriDocumentsViewController implements BindableView {
 
     private boolean isFileUri(String uri) {
         return uri.startsWith("file:") || (! uri.contains(":"));
+    }
+    private boolean isFileUri(URI uri) {
+        return "file".equals(uri.getScheme());
     }
     private String getFilePath(String uri) {
         if (uri.startsWith("file:")) {
@@ -154,17 +168,11 @@ public class UriDocumentsViewController implements BindableView {
         }
     }
 
-    CopyDown html2markdownConverter = new CopyDown();
-    DocumentParser documentParser = inputStream -> {
-        try {
-            var soup = Jsoup.parse(inputStream, "UTF-8", "");
-            var markdown = html2markdownConverter.convert(soup.outerHtml());
-            return Document.from(markdown);
-        } catch (Exception e) {
-            System.err.println(e);
-            throw new RuntimeException(e);
-        }
-    };
+    @Inject
+    Logger logger;
+
+    @Inject
+    DocumentParser documentParser;
 
     private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
 
@@ -232,38 +240,39 @@ public class UriDocumentsViewController implements BindableView {
 
     @FXML
     void loadDocuments(ActionEvent event) {
-        buttonActionProgressHelper.performAction(
-            event, () -> {
-                List<Document> documents = filteredUris.parallelStream()
-                .map(uri -> {
-                    try (var stream = uri.toURL().openStream()) {
-                        var document = documentParser.parse(stream);
-                        document.metadata().put(Document.URL, uri.toString());
-                        if (uri.getScheme().equals("file")) {
-                            var path = Path.of(uri.getPath());
-                            document.metadata().put(Document.ABSOLUTE_DIRECTORY_PATH, path.getParent().toString());
-                            document.metadata().put(Document.FILE_NAME, path.getFileName().toString());
-                        }
-                        return document;
-                    } catch (IOException ex) {
-                        System.err.println("Error loading document from " + uri + ": " + ex);
-                        return null;
+        int uriCount = filteredUris.size();
+        buttonActionProgressHelper.performActions(event.getSource(), uriCount, progress -> {
+            CountDownLatch latch = new CountDownLatch(uriCount);
+            List<Document> documents = Collections.synchronizedList(new ArrayList<>());
+            Runnable updater = () -> uriDocumentsProperty.setValue(new Documents(new ArrayList<>(documents)));
+            filteredUris.forEach(uri -> Thread.ofVirtual().start(() -> {
+                try (var stream = uri.toURL().openStream()) {
+                    var document = documentParser.parse(stream);
+                    document.metadata().put(Document.URL, uri.toString());
+                    if (isFileUri(uri)) {
+                        var path = Path.of(uri.getPath());
+                        document.metadata().put(Document.ABSOLUTE_DIRECTORY_PATH, path.getParent().toString());
+                        document.metadata().put(Document.FILE_NAME, path.getFileName().toString());
                     }
-                })
-                .filter(Objects::nonNull)
-                .toList();
-                return new Documents(documents);
-            },
-            documents -> uriDocumentsProperty.setValue(documents),
-            exception -> {
-                if (alert == null) {
-                    alert = new Alert(Alert.AlertType.ERROR);
+                    int newSize = documents.size() + 1;
+                    documents.add(document);
+                    progress.call(newSize);
+                    if (newSize % 10 == 0) {
+                        Platform.runLater(updater);
+                    }
+                } catch (IOException ex) {
+                    logger.warn("Error loading document from " + uri, ex);
+                } finally {
+                    latch.countDown();
                 }
-                alert.setTitle("Exception when loading documents");
-                alert.setHeaderText(exception.getClass().getSimpleName());
-                alert.setContentText(exception.getMessage());
-                alert.showAndWait();        
+            }));
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+            } finally {
+                progress.call(null);                
+                Platform.runLater(updater);
             }
-        );
+        });
     }
 }

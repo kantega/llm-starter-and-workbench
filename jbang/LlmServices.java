@@ -27,6 +27,9 @@ public class LlmServices {
     @ConfigProperty(name = "quarkus.langchain4j.ollama.timeout")
     Duration timeout;
 
+    @Inject
+    Logger logger;
+
     @Produces
     public DocumentParser getDocumentParser() {
         var html2markdownConverter = new io.github.furstenheim.CopyDown();
@@ -36,7 +39,7 @@ public class LlmServices {
                 var markdown = html2markdownConverter.convert(soup.outerHtml());
                 return Document.from(markdown);
             } catch (Exception e) {
-                System.err.println(e);
+                logger.warn(e);
                 throw new RuntimeException(e);
             }
         };

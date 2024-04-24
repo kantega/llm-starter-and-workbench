@@ -3,6 +3,7 @@ package no.kantega.llm.fx;
 import java.io.File;
 import java.util.List;
 
+import org.jboss.logging.Logger;
 import org.jsoup.Jsoup;
 
 import dev.langchain4j.data.document.Document;
@@ -74,17 +75,11 @@ public class FileSystemDocumentsViewController implements BindableView {
         }
     }
 
-    CopyDown html2markdownConverter = new CopyDown();
-    DocumentParser documentParser = inputStream -> {
-        try {
-            var soup = Jsoup.parse(inputStream, "UTF-8", "");
-            var markdown = html2markdownConverter.convert(soup.outerHtml());
-            return Document.from(markdown);
-        } catch (Exception e) {
-            System.err.println(e);
-            throw new RuntimeException(e);
-        }
-    };
+    @Inject
+    Logger logger;
+
+    @Inject
+    DocumentParser documentParser;
 
     private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
 

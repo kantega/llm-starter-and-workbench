@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.jboss.logging.Logger;
+
 import com.panemu.tiwulfx.control.dock.DetachableTab;
 import com.panemu.tiwulfx.control.dock.DetachableTabPane;
 
@@ -92,6 +94,9 @@ public class ViewManager {
         };
     }
 
+    @Inject
+    Logger logger;
+
     ViewInfo addViewUsingPlaceholder(String id) {
         ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
         if (isInstanceId(id) && views.containsKey(id)) {
@@ -109,7 +114,7 @@ public class ViewManager {
             }, viewInfo -> {
                 removeView(placeholderView);
             }, ex -> {
-                System.err.println("Error creating " + id + " view: " + ex);
+                logger.error("Error creating " + id + " view: " + ex, ex);
                 removeView(placeholderView);
             });
         });
