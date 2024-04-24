@@ -25,7 +25,6 @@ public class ViewProviders {
     ViewProvider chatModelsView() {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.ChatModelsView", "Chat models"), fxmlLoaderProvider, "/no/kantega/llm/fx/ChatModelsView.fxml");
     }
-
     @Produces
     ViewProvider embeddingsScoreView() {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.EmbeddingsScoreView", "Embeddings score"), fxmlLoaderProvider, "/no/kantega/llm/fx/EmbeddingsScoreView.fxml");
@@ -41,10 +40,6 @@ public class ViewProviders {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.SimpleChatView", "Simple chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/SimpleChatView.fxml");
     }
 
-    @Produces
-    ViewProvider fileSystemDocumentsView() throws IOException {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.FileSystemDocumentsView", "File system documents"), fxmlLoaderProvider, "/no/kantega/llm/fx/FileSystemDocumentsView.fxml");
-    }
     @Produces
     ViewProvider uriDocumentsView() throws IOException {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.UriDocumentsView", "Uri documents"), fxmlLoaderProvider, "/no/kantega/llm/fx/UriDocumentsView.fxml");

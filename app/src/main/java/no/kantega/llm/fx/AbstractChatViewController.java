@@ -1,8 +1,11 @@
 package no.kantega.llm.fx;
 
+import org.jboss.logging.Logger;
+
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.service.TokenStream;
+import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -57,9 +60,12 @@ public abstract class AbstractChatViewController {
         TokenStream answer(String query);
     }
 
+    @Inject
+    Logger logger;
+
     void handleSendUserMessage(String userMessage, Object eventSource) {
         getAiMessageTextControl().setText("");
-        buttonActionProgressHelper.performStreamingAction(eventSource, callback ->
+        buttonActionProgressHelper.performStreamingAction(eventSource, callback -> {
             getChatbotAgent().answer(userMessage)
                 .onNext(nextToken -> {
                     callback.call(null);
@@ -69,8 +75,11 @@ public abstract class AbstractChatViewController {
                     callback.call(true);
                     Platform.runLater(() -> handleCompleteAiMessage(answer.content()));
                 })
-                .onError(throwable -> callback.call(false))
-                .start()
-            );
+                .onError(ex -> {
+                    logger.error(ex);
+                    callback.call(false);
+                })
+                .start();
+            });
     }
 }

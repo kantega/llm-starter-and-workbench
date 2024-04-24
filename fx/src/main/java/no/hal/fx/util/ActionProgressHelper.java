@@ -29,8 +29,11 @@ public class ActionProgressHelper {
         return prepareAction(object, graphics, 1.0);
     }
 
-    private Runnable prepareAction(Object object, Region graphics, double widthFactor) {
-        if (object instanceof Labeled labeled) {
+    private Runnable prepareAction(Object source, Region graphics, double widthFactor) {
+        if (source instanceof Event event) {
+            source = event.getSource();
+        }
+        if (source instanceof Labeled labeled) {
             var insets = labeled.getInsets();
             var heightSubscription = labeled.heightProperty().subscribe(height -> {
                 var prefSize = labeled.getHeight() - insets.getTop() - insets.getBottom() - 1.0;
@@ -38,9 +41,9 @@ public class ActionProgressHelper {
             });
             var oldGraphics = labeled.getGraphic();
             labeled.setGraphic(graphics);
-            if (labeled instanceof ButtonBase button) {
-                button.setDisable(true);
-            }
+            // if (labeled instanceof ButtonBase button) {
+            //     button.setDisable(true);
+            // }
             return () -> {
                 heightSubscription.unsubscribe();
                 labeled.setGraphic(oldGraphics);
@@ -48,7 +51,7 @@ public class ActionProgressHelper {
                     button.setDisable(false);
                 }
             };
-        } else if (object instanceof Tab tab) {
+        } else if (source instanceof Tab tab) {
             var oldGraphics = tab.getGraphic();
             graphics.setPrefSize(20.0 * widthFactor, 20.0);
             tab.setGraphic(graphics);
@@ -60,9 +63,6 @@ public class ActionProgressHelper {
     }
 
     public <T> void performAction(Object source, Callable<T> task, Consumer<T> onSuccess, Consumer<Exception> onFailure) {
-        if (source instanceof Event event) {
-            source = event.getSource();
-        }
         Runnable finishRunnable = prepareAction(source, progressIndicator);
         Thread.ofVirtual().start(() -> {
             try {

@@ -3,7 +3,6 @@ package no.kantega.llm.fx;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
@@ -122,7 +121,6 @@ public class RagChatViewController extends AbstractChatViewController implements
 
         String sendUserMessageActionTextFormat = sendUserMessageAction.getText();
         LabelAdapter<StreamingChatLanguageModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
-        sendUserMessageAction.disableProperty().bind(chatModelProperty.map(Objects::isNull));
         var computedLabelValue = chatModelProperty.map(cm -> sendUserMessageActionTextFormat.formatted(labelAdapter.getText(cm)));
         sendUserMessageAction.textProperty().bind(computedLabelValue.orElse(sendUserMessageActionTextFormat.formatted("?")));
 

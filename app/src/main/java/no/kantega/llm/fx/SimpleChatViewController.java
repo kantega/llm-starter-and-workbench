@@ -109,7 +109,6 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
 
         String sendUserMessageActionTextFormat = sendUserMessageAction.getText();
         LabelAdapter<StreamingChatLanguageModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
-        sendUserMessageAction.disableProperty().bind(chatModelProperty.map(Objects::isNull));
         var computedLabelValue = chatModelProperty.map(cm -> sendUserMessageActionTextFormat.formatted(labelAdapter.getText(cm)));
         sendUserMessageAction.textProperty().bind(computedLabelValue.orElse(sendUserMessageActionTextFormat.formatted("?")));
 

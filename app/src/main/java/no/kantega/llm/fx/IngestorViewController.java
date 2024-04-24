@@ -1,23 +1,20 @@
 package no.kantega.llm.fx;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
+
+import org.jboss.logging.Logger;
 
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
-import dev.langchain4j.store.embedding.EmbeddingStore;
-import dev.langchain4j.store.embedding.EmbeddingStoreIngestor;
-import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
-import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
+import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
@@ -42,6 +39,10 @@ public class IngestorViewController implements BindableView {
 
     @FXML
     Button ingestAction;
+    @FXML
+    Button embedAction;
+
+    private String embedActionTextFormat;
 
     @Inject
     Instance<LabelAdapter<?>> labelAdapters;
@@ -72,32 +73,42 @@ public class IngestorViewController implements BindableView {
     private Property<TextSegmentEmbeddings> allTextSegmentEmbeddingsProperty = new SimpleObjectProperty<>();
 
     @FXML
-    ListView<Object> embeddingsListView;
+    ListView<TextSegment> textSegmentsListView;
 
     @FXML
     void initialize() {
         String ingestActionTextFormat = ingestAction.getText();
-        LabelAdapter<EmbeddingModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
-        ingestAction.disableProperty().bind(embeddingModelProperty.map(Objects::isNull));        
-        ingestAction.textProperty().bind(Bindings.createStringBinding(() -> {
-            var documentCount = documentsModelProperty.getValue().documents().size();
-            var embeddingModelText = embeddingModelProperty.map(em -> labelAdapter.getText(em)).orElse("?").getValue();
-            return ingestActionTextFormat.formatted(documentCount, embeddingModelText);
-        }, documentsModelProperty, embeddingModelProperty));
+        ingestAction.textProperty().bind(documentsModelProperty.map(dm -> ingestActionTextFormat.formatted(dm.documents().size())));
+        
+        this.embedActionTextFormat = embedAction.getText();
+        this.emLabelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
 
-        allTextSegmentEmbeddingsProperty.subscribe(textSegmentEmbeddings -> {
-            embeddingsListView.getItems().setAll(textSegmentEmbeddings != null ? textSegmentEmbeddings.textSegmentEmbeddings() : Collections.emptyList());
-        });
+        documentsModelProperty.subscribe(this::updateEmbedActionText);
+        embeddingModelProperty.subscribe(this::updateEmbedActionText);
+        textSegmentsListView.getItems().subscribe(this::updateEmbedActionText);
+        textSegmentsListView.getItems().subscribe(this::updateEmbedActionText);
+        textSegmentsListView.getSelectionModel().getSelectedItems().subscribe(this::updateEmbedActionText);
 
-        AdapterListView.adapt(this.embeddingsListView, CompositeLabelAdapter.of(this.labelAdapters));
+        AdapterListView.adapt(this.textSegmentsListView, CompositeLabelAdapter.of(this.labelAdapters));
 
         this.bindingTargets = List.of(
             new BindingTarget<Documents>(ingestAction, Documents.class, documentsModelProperty),
             new BindingTarget<EmbeddingModel>(ingestAction, EmbeddingModel.class, embeddingModelProperty)
         );
         this.bindingSources = List.of(
-            new BindingSource<TextSegmentEmbeddings>(this.embeddingsListView, TextSegmentEmbeddings.class, allTextSegmentEmbeddingsProperty)
+            new BindingSource<TextSegmentEmbeddings>(this.embedAction, TextSegmentEmbeddings.class, allTextSegmentEmbeddingsProperty)
         );
+    }
+
+    private LabelAdapter<EmbeddingModel> emLabelAdapter;
+
+    private void updateEmbedActionText() {
+        var segmentCount = textSegmentsListView.getSelectionModel().getSelectedItems().size();
+        if (segmentCount == 0) {
+            segmentCount = textSegmentsListView.getItems().size();
+        }
+        var embeddingModelText = embeddingModelProperty.map(em -> emLabelAdapter.getText(em)).orElse("?").getValue();
+        embedAction.setText(this.embedActionTextFormat.formatted(segmentCount, embeddingModelText));
     }
 
     private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
@@ -106,31 +117,36 @@ public class IngestorViewController implements BindableView {
     }
 
     @FXML
-    void handleIngest() {
-        List<TextSegmentEmbedding> allTextSegments = new ArrayList<>();
-        EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>() {
-            public List<String> addAll(List<Embedding> embeddings, List<TextSegment> textSegments) {
-                var ids = super.addAll(embeddings, textSegments);
-                for (int i = 0; i < textSegments.size(); i++) {
-                    allTextSegments.add(new TextSegmentEmbedding(textSegments.get(i), embeddings.get(i)));
-                }
-                return ids;
-            }
-        };
-        EmbeddingModel embeddingModel = embeddingModelProperty.getValue();
-        EmbeddingStoreIngestor ingestor = EmbeddingStoreIngestor.builder()
-            .documentSplitter(DocumentSplitters.recursive(Integer.valueOf(segmentSizeText.getText()), Integer.valueOf(segmentOverlapText.getText())))
-            .embeddingModel(embeddingModel)
-            .embeddingStore(embeddingStore)
-            .build();
-        
-        buttonActionProgressHelper.performAction(ingestAction,
-            () -> {
-                ingestor.ingest(documentsModelProperty.getValue().documents());
-                return allTextSegments;
-            },
-            textSegments -> allTextSegmentEmbeddingsProperty.setValue(new TextSegmentEmbeddings(embeddingModel, textSegments)),
-            exception -> allTextSegmentEmbeddingsProperty.setValue(new TextSegmentEmbeddings(embeddingModel, Collections.emptyList()))
+    void handleIngest(ActionEvent event) {
+        var documentSplitter = DocumentSplitters.recursive(Integer.valueOf(segmentSizeText.getText()), Integer.valueOf(segmentOverlapText.getText()));
+        var documents = documentsModelProperty.getValue().documents();
+        buttonActionProgressHelper.performAction(event,
+            () -> documentSplitter.splitAll(documents),
+            textSegments -> textSegmentsListView.getItems().setAll(textSegments),
+            ex -> textSegmentsListView.getItems().clear()
         );
+    }
+
+    @Inject
+    Logger logger;
+    
+    @FXML
+    void handleEmbed(ActionEvent event) {
+        List<TextSegment> textSegments = new ArrayList<>(textSegmentsListView.getSelectionModel().getSelectedItems());
+        if (textSegments.isEmpty()) {
+            textSegments.addAll(textSegmentsListView.getItems());
+        }
+        EmbeddingModel embeddingModel = embeddingModelProperty.getValue();
+        buttonActionProgressHelper.performActions(event, textSegments.size(), progress -> {
+            var textSegmentEmbeddings = new ArrayList<TextSegmentEmbedding>();
+            for (int i = 0; i < textSegments.size(); i++) {
+                var textSegment = textSegments.get(i);
+                var embedding = embeddingModel.embed(textSegment).content();
+                textSegmentEmbeddings.add(new TextSegmentEmbedding(textSegment, embedding));
+                progress.call(i + 1);
+            }
+            progress.call(null);
+            allTextSegmentEmbeddingsProperty.setValue(new TextSegmentEmbeddings(embeddingModel, textSegmentEmbeddings));
+        });
     }
 }

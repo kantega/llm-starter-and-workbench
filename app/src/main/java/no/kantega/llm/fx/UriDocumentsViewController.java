@@ -8,14 +8,11 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
-import java.util.Objects;
 import java.util.concurrent.CountDownLatch;
 
 import org.jboss.logging.Logger;
-import org.jsoup.Jsoup;
 
 import crawlercommons.sitemaps.AbstractSiteMap;
 import crawlercommons.sitemaps.SiteMap;
@@ -24,10 +21,10 @@ import crawlercommons.sitemaps.SiteMapParser;
 import crawlercommons.sitemaps.SiteMapURL;
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.DocumentParser;
-import io.github.furstenheim.CopyDown;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import jakarta.inject.Named;
 import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
@@ -172,6 +169,7 @@ public class UriDocumentsViewController implements BindableView {
     Logger logger;
 
     @Inject
+    @Named("jsoup+copydown")
     DocumentParser documentParser;
 
     private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
@@ -241,7 +239,7 @@ public class UriDocumentsViewController implements BindableView {
     @FXML
     void loadDocuments(ActionEvent event) {
         int uriCount = filteredUris.size();
-        buttonActionProgressHelper.performActions(event.getSource(), uriCount, progress -> {
+        buttonActionProgressHelper.performActions(event, uriCount, progress -> {
             CountDownLatch latch = new CountDownLatch(uriCount);
             List<Document> documents = Collections.synchronizedList(new ArrayList<>());
             Runnable updater = () -> uriDocumentsProperty.setValue(new Documents(new ArrayList<>(documents)));

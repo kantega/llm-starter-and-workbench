@@ -10,7 +10,10 @@
     <HBox>
         <TextField fx:id="segmentSizeText" text="300" promptText="Segment size"/>
         <TextField fx:id="segmentOverlapText" text="20" promptText="Segment overlap"/>
-        <Button fx:id="ingestAction" text="Ingest %s documents with %s" onAction="#handleIngest"/>
+        <Button fx:id="ingestAction" text="Ingest %s documents" onAction="#handleIngest"/>
     </HBox>
-    <ListView fx:id="embeddingsListView" VBox.vgrow="ALWAYS"/>
+    <ListView fx:id="textSegmentsListView" VBox.vgrow="ALWAYS"/>
+    <HBox>
+        <Button fx:id="embedAction" text="Embed %s segments with %s" onAction="#handleEmbed"/>
+    </HBox>
 </VBox>

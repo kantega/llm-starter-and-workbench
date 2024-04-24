@@ -33,6 +33,11 @@ public class FxProviders {
     }
 
     @Produces
+    LabelAdapter<TextSegment> labelAdapterForTextSegment() {
+        return LabelAdapter.forClass(TextSegment.class, ts -> textSegmentString("", ts));
+    }
+
+    @Produces
     LabelAdapter<TextSegmentEmbedding> labelAdapterForTextSegmentEmbedding() {
         return LabelAdapter.forClass(TextSegmentEmbedding.class, tse -> textSegmentString("", tse.textSegment()));
     }

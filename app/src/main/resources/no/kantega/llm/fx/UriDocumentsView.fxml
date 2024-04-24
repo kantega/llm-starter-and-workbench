@@ -9,14 +9,14 @@
 
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.UriDocumentsViewController">
     <HBox>
-        <TextField fx:id="uriText" promptText="&lt;uri&gt;" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="uriText" promptText="URL, e.g. to sitemap.xml, or path to local folder with html" HBox.hgrow="ALWAYS"/>
         <Button fx:id="scanForUrisAction" text="Scan" onAction="#scanForUris"/>
         <Button text="Folder..." onAction="#browseDocumentsFolder"/>
     </HBox>
     <HBox>
-        <Label text="Filter path and/or extension: "/>
-        <TextField fx:id="pathFilterText" promptText="&lt;path filter&gt;" HBox.hgrow="ALWAYS"/>
-        <TextField fx:id="extensionFilterText" promptText="&lt;extension filter&gt;"/>
+        <Label text="Filter: "/>
+        <TextField fx:id="pathFilterText" promptText="Path contains" HBox.hgrow="ALWAYS"/>
+        <TextField fx:id="extensionFilterText" promptText="Filename ends with"/>
     </HBox>
     <ListView fx:id="uriListView"/>
     <Button fx:id="loadDocumentsAction" text="Load %s documents" onAction="#loadDocuments"/>
