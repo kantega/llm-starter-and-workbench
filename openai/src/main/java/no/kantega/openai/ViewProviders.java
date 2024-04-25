@@ -1,4 +1,4 @@
-package no.kantega.ollama;
+package no.kantega.openai;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -15,7 +15,7 @@ public class ViewProviders {
     Provider<FXMLLoader> fxmlLoaderProvider;
 
     @Produces
-    ViewProvider ollamaChatModelsView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.OllamaModelsView", "Ollama models"), fxmlLoaderProvider, "/no/kantega/ollama/fx/OllamaModelsView.fxml");
+    ViewProvider openaiChatModelsView() {
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.OpenaiChatModelsView", "OpenAi chat models", "Chat models"), fxmlLoaderProvider, "/no/kantega/openai/fx/OpenaiChatModelsView.fxml");
     }
 }

@@ -3,10 +3,5 @@
         "type": "view",
         "id": "no.kantega.llm.fx.EmbeddingModelsView#0",
         "storedstate": null
-    },
-    {
-        "type": "view",
-        "id": "no.kantega.llm.fx.ChatModelsView#0",
-        "storedstate": null
     }
 ]

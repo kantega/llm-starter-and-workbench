@@ -4,7 +4,7 @@
 
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>llmwb-ollama</artifactId>
+    <artifactId>llmwb-openai</artifactId>
     <version>DEV-SNAPSHOT</version>
 
     <parent>
@@ -36,7 +36,7 @@
         </dependency>
         <dependency>
             <groupId>dev.langchain4j</groupId>
-            <artifactId>langchain4j-ollama</artifactId>
+            <artifactId>langchain4j-open-ai</artifactId>
         </dependency>
 
         <dependency>
@@ -54,10 +54,6 @@
         <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.quarkus</groupId>
-            <artifactId>quarkus-rest-client-jackson</artifactId>
         </dependency>
     </dependencies>
 

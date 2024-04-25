@@ -18,45 +18,41 @@ public class ViewProviders {
 
     @Produces
     ViewProvider embeddingModelsView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.EmbeddingModelsView", "Embedding models"), fxmlLoaderProvider, "/no/kantega/llm/fx/EmbeddingModelsView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.EmbeddingModelsView", "Embedding models", "Embeddings"), fxmlLoaderProvider, "/no/kantega/llm/fx/EmbeddingModelsView.fxml");
     }
 
     @Produces
-    ViewProvider chatModelsView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.ChatModelsView", "Chat models"), fxmlLoaderProvider, "/no/kantega/llm/fx/ChatModelsView.fxml");
-    }
-    @Produces
     ViewProvider embeddingsScoreView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.EmbeddingsScoreView", "Embeddings score"), fxmlLoaderProvider, "/no/kantega/llm/fx/EmbeddingsScoreView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.EmbeddingsScoreView", "Embeddings score", "Embeddings"), fxmlLoaderProvider, "/no/kantega/llm/fx/EmbeddingsScoreView.fxml");
     }
 
     @Produces
     ViewProvider chatMemoryView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.ChatMemoryView", "Chat memory"), fxmlLoaderProvider, "/no/kantega/llm/fx/ChatMemoryView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.ChatMemoryView", "Chat memory", "Chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/ChatMemoryView.fxml");
     }
 
     @Produces
     ViewProvider simpleChatView() throws IOException {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.SimpleChatView", "Simple chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/SimpleChatView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.SimpleChatView", "Simple chat", "Chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/SimpleChatView.fxml");
     }
 
     @Produces
     ViewProvider uriDocumentsView() throws IOException {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.UriDocumentsView", "Uri documents"), fxmlLoaderProvider, "/no/kantega/llm/fx/UriDocumentsView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.UriDocumentsView", "Uri documents", "ETL"), fxmlLoaderProvider, "/no/kantega/llm/fx/UriDocumentsView.fxml");
     }
 
     @Produces
     ViewProvider ingestorView() throws IOException {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.IngestorView", "Ingestor"), fxmlLoaderProvider, "/no/kantega/llm/fx/IngestorView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.IngestorView", "Ingestor", "ETL"), fxmlLoaderProvider, "/no/kantega/llm/fx/IngestorView.fxml");
     }
 
     @Produces
     ViewProvider embeddingsSearchView() throws IOException {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.EmbeddingsSearchView", "Embeddings search"), fxmlLoaderProvider, "/no/kantega/llm/fx/EmbeddingsSearchView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.EmbeddingsSearchView", "Embeddings search", "Embeddings"), fxmlLoaderProvider, "/no/kantega/llm/fx/EmbeddingsSearchView.fxml");
     }
 
     @Produces
     ViewProvider ragChatView() throws IOException {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.RagChatView", "Rag chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/RagChatView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.RagChatView", "Rag chat", "Chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/RagChatView.fxml");
     }
 }

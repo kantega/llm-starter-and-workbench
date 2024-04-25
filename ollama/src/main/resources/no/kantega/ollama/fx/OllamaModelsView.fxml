@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.ollama.fx.OllamaModelsViewController">
+    <Button text="Refresh models" onAction="#refreshChatModels"/>
+    <HBox>
+        <ListView fx:id="ollamaModelsListView"/>
+        <TextArea fx:id="ollamaModelDetailsText"/>
+    </HBox>
+    <HBox>
+        <Button fx:id="embeddingModelAction" text="Create Embedding model" onAction="#createAndUpdateEmbeddingModel"/>
+    <!--
+        <Button fx:id="chatModelAction" text="Chat model" onAction="#createAndUpdateChatModel"/>
+     -->
+        <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createAndUpdateStreamingChatModel"/>
+    </HBox>
+    <fx:include fx:id="ollamaChatModelView" source="OllamaChatModelView.fxml"/>
+</VBox>

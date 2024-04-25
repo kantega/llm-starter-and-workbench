@@ -7,17 +7,13 @@
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.layout.HBox?>
 
-<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.ollama.fx.OllamaChatModelsViewController">
-    <Button text="Refresh models" onAction="#refreshChatModels"/>
-    <HBox>
-        <ListView fx:id="ollamaModelsListView"/>
-        <TextArea fx:id="ollamaModelDetailsText"/>
-    </HBox>
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.openai.fx.OpenaiChatModelsViewController">
+    <ListView fx:id="openaiModelsListView"/>
     <HBox>
     <!--
         <Button fx:id="chatModelAction" text="Chat model" onAction="#createAndUpdateChatModel"/>
      -->
         <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createAndUpdateStreamingChatModel"/>
     </HBox>
-    <fx:include fx:id="ollamaChatModelView" source="OllamaChatModelView.fxml"/>
+    <fx:include fx:id="openaiChatModelView" source="OpenaiChatModelView.fxml"/>
 </VBox>

@@ -4,9 +4,9 @@ import java.util.List;
 
 import org.eclipse.microprofile.rest.client.inject.RestClient;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.ollama.OllamaChatModel;
+import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.model.ollama.OllamaEmbeddingModel;
 import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
@@ -26,7 +26,7 @@ import no.kantega.ollama.OllamaServices;
 import no.kantega.ollama.rest.OllamaApi;
 
 @Dependent
-public class OllamaChatModelsViewController implements BindableView {
+public class OllamaModelsViewController implements BindableView {
 
     @FXML
     ListView<OllamaApi.Model> ollamaModelsListView;
@@ -36,6 +36,11 @@ public class OllamaChatModelsViewController implements BindableView {
 
     @FXML
     OllamaChatModelViewController ollamaChatModelViewController;
+
+    @FXML
+    Button embeddingModelAction;
+
+    private Property<EmbeddingModel> embeddingModelProperty = new SimpleObjectProperty<>();
 
     // @FXML
     // Button chatModelAction;
@@ -70,6 +75,7 @@ public class OllamaChatModelsViewController implements BindableView {
         });
 
         this.bindingSources = List.of(
+            new BindingSource<EmbeddingModel>(this.embeddingModelAction, EmbeddingModel.class, embeddingModelProperty),
             // new BindingSource<ChatLanguageModel>(this.chatModelAction, ChatLanguageModel.class, chatModelProperty),
             new BindingSource<StreamingChatLanguageModel>(this.streamingChatModelAction, StreamingChatLanguageModel.class, streamingChatModelProperty)
         );
@@ -102,8 +108,19 @@ public class OllamaChatModelsViewController implements BindableView {
     // }
     
     @FXML
+    void createAndUpdateEmbeddingModel() {
+        var modelName = ollamaModelsListView.getSelectionModel().getSelectedItem().name();
+        var embeddingModel = ollamaServices.withEmbeddingModelLabel(modelName, name -> OllamaEmbeddingModel.builder()
+            .baseUrl(ollamaServices.getBaseUrl())
+            .modelName(name)
+            .build()
+        );
+        embeddingModelProperty.setValue(embeddingModel);
+    }
+    
+    @FXML
     void createAndUpdateStreamingChatModel() {
-        var modelName = ((OllamaApi.Model) ollamaModelsListView.getSelectionModel().getSelectedItem()).name();
+        var modelName = ollamaModelsListView.getSelectionModel().getSelectedItem().name();
         var chatModel = ollamaServices.withStreamingChatModelLabel(modelName, name -> OllamaStreamingChatModel.builder()
             .baseUrl(ollamaServices.getBaseUrl())
             .modelName(name)
