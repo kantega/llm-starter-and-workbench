@@ -20,12 +20,6 @@
                 <Menu fx:id="viewMenu" mnemonicParsing="true" text="View"/>
             </menus>
         </MenuBar>
-        <StackPane fx:id="bindingControllerRoot">
-            <SplitPane VBox.vgrow="ALWAYS">
-                <items>
-                    <DetachableTabPane fx:id="detachableTabPane1"/>
-                </items>
-            </SplitPane>
-        </StackPane>
+        <StackPane fx:id="viewModelContainer"/>
     </VBox>
 </Scene>

@@ -1,10 +1,9 @@
 package no.hal.wb.views;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
@@ -18,13 +17,16 @@ import jakarta.enterprise.inject.spi.BeanManager;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
 import javafx.css.Styleable;
+import javafx.scene.Parent;
 import javafx.scene.control.ContextMenu;
+import javafx.scene.control.Menu;
 import javafx.scene.control.MenuItem;
 import javafx.scene.control.Tab;
 import javafx.scene.layout.Pane;
 import no.hal.fx.util.ActionProgressHelper;
 import no.hal.wb.storedstate.Configurable;
 import no.hal.wb.storedstate.StoredStateManager;
+import no.hal.wb.views.ViewModel.ContainerItem;
 
 /*
  * Based on https://github.com/panemu/tiwulfx-dock
@@ -63,12 +65,18 @@ public class ViewManager {
         return Optional.empty();
     }
 
-    private Map<String, ViewInfo> views = new HashMap<>();
+    private ViewModel viewModel;
+
+    public ViewModel getViewModel() {
+        return viewModel;
+    }    
 
     private DetachableTabPane detachableTabPane;
 
-    public void setDetachableTabPane(DetachableTabPane detachableTabPane) {
-        this.detachableTabPane = detachableTabPane;
+    public void initialize(Pane viewModelContainer, ContainerItem<?> containerItem) {
+        this.viewModel = ViewModel.of(viewModelContainer, containerItem);
+        ViewModel.ContainerItem<DetachableTabPane> tabPaneContainer = viewModel.findContainerItem(viewModel.getRootItem(), ViewModel.ContainerType.TabPaneContainer.class);
+        this.detachableTabPane = tabPaneContainer.itemNode();
     }
 
     @Inject
@@ -99,10 +107,10 @@ public class ViewManager {
 
     ViewInfo addViewUsingPlaceholder(String id) {
         ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
-        if (isInstanceId(id) && views.containsKey(id)) {
+        if (isInstanceId(id) && viewModel.containsView(id)) {
             throw new IllegalArgumentException("instanceId " + id + " already in use");
         }
-        var n = views.values().stream().filter(vi -> vi.info().equals(viewProvider.getViewInfo())).count();
+        var n = viewModel.viewCount(viewProvider.viewProviderId());
         String viewTitle = viewProvider.getViewInfo().viewTitle() + " #" + (n + 1);
         var instanceId = (isInstanceId(id) ? id : viewProvider.getViewInfo().viewProviderId() + "#" + n);
 
@@ -137,7 +145,7 @@ public class ViewManager {
         if (! contextMenuItems.isEmpty()) {
             tab.setContextMenu(new ContextMenu(contextMenuItems.toArray(new MenuItem[0])));
         }
-        views.put(viewInfo.viewId(), viewInfo);
+        viewModel.registerView(viewInfo);
         Platform.runLater(() -> {
             detachableTabPane.getTabs().add(tab);
             detachableTabPane.getSelectionModel().selectLast();
@@ -148,10 +156,10 @@ public class ViewManager {
 
     ViewInfo addView(String id) {
         ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
-        if (isInstanceId(id) && views.containsKey(id)) {
+        if (isInstanceId(id) && viewModel.containsView(id)) {
             throw new IllegalArgumentException("instanceId " + id + " already in use");
         }
-        var n = views.values().stream().filter(vi -> vi.info().equals(viewProvider.getViewInfo())).count();
+        var n = viewModel.viewCount(viewProvider.viewProviderId());
         String viewTitle = viewProvider.getViewInfo().viewTitle() + " #" + (n + 1);
         var instanceId = (isInstanceId(id) ? id : viewProvider.getViewInfo().viewProviderId() + "#" + n);
 
@@ -161,7 +169,7 @@ public class ViewManager {
     void removeView(ViewInfo viewInfo) {
         findViewProvider(viewInfo.info().viewProviderId())
             .ifPresent(viewProvider -> {
-                views.remove(viewInfo.viewId());
+                viewModel.unregisterView(viewInfo);
                 switch (viewInfo.viewItem()) {
                     case Tab tab -> detachableTabPane.getTabs().remove(tab);
                     case null, default -> {
@@ -175,7 +183,7 @@ public class ViewManager {
 
     @PreDestroy
     void storeViewState() {
-        for (var viewInfo : views.values()) {
+        for (var viewInfo : viewModel) {
             if (viewInfo.instance().controller() instanceof Configurable configurable) {
                 stateStorageManager.storeStateForId(viewInfo.viewId(), "view", configurable);
             }
@@ -216,7 +224,26 @@ public class ViewManager {
             .toList();
     }
 
-    public List<MenuItem> createViewCreationItems(String textFormat) {
+    public List<MenuItem> createViewCreationMenuItems(String textFormat) {
+        var viewByCategory = viewProviders.stream()
+            .collect(Collectors.groupingBy(viewProvider -> {
+                var category = viewProvider.getViewInfo().viewCategory();
+                return (category != null ? category : "");
+            }));
+        return viewByCategory.keySet().stream()
+            .flatMap(category -> {
+                if (category == null || category.isBlank()) {
+                    return createViewCreationItems(viewByCategory.get(category), textFormat).stream();
+                } else {
+                    var categoryMenu = new Menu(category);
+                    categoryMenu.getItems().addAll(createViewCreationItems(viewByCategory.get(category), textFormat));
+                    return List.of(categoryMenu).stream();
+                }
+            })
+            .toList();
+    }
+
+    public List<MenuItem> createViewCreationItems(List<ViewProvider> viewProviders, String textFormat) {
         return viewProviders.stream()
             .map(viewProvider -> {
                 var menuItem = new MenuItem(textFormat.formatted(viewProvider.getViewInfo().viewTitle()));

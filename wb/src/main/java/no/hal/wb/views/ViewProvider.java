@@ -20,7 +20,14 @@ public interface ViewProvider {
     default void dispose(Instance viewInstance) {
     }
 
-    public record Info(String viewProviderId, String viewTitle) {
+    default String viewProviderId() {
+        return getViewInfo().viewProviderId();
+    }
+
+    public record Info(String viewProviderId, String viewTitle, String viewCategory) {
+        public Info(String viewProviderId, String viewTitle) {
+            this(viewProviderId, viewTitle, null);
+        }
     }
 
     public record Instance(Object controller, Node viewNode) {
