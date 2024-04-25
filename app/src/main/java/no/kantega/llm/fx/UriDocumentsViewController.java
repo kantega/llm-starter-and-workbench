@@ -169,7 +169,7 @@ public class UriDocumentsViewController implements BindableView {
     Logger logger;
 
     @Inject
-    @Named("jsoup+copydown")
+    @Named("jsoup+text")
     DocumentParser documentParser;
 
     private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
