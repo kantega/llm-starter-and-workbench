@@ -6,12 +6,15 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
+import java.util.stream.Stream;
 
 import javafx.event.EventHandler;
 import javafx.geometry.Bounds;
 import javafx.geometry.Point2D;
 import javafx.geometry.Point3D;
 import javafx.scene.Node;
+import javafx.scene.control.Control;
+import javafx.scene.control.Tooltip;
 import javafx.scene.input.KeyEvent;
 import javafx.scene.input.MouseEvent;
 import javafx.scene.layout.Pane;
@@ -33,20 +36,35 @@ public class BindingController {
     private List<BindingTarget<?>> bindingTargets = new ArrayList<>();
     
     public void addBindingSources(BindableView bindableView) {
-        this.bindingSources.addAll(bindableView.getBindingSources());
+        var sources = bindableView.getBindingSources();
+        this.bindingSources.addAll(sources);
+        sources.forEach(this::updateBindingSourceTooltip);
     }
     public void removeBindingSources(BindableView bindableView) {
-        this.bindingSources.removeAll(bindableView.getBindingSources());
+        var sources = bindableView.getBindingSources();
+        this.bindingSources.removeAll(sources);
+        sources.forEach(this::updateBindingSourceTooltip);
     }
     
     public void addBindingTargets(BindableView bindableView) {
-        this.bindingTargets.addAll(bindableView.getBindingTargets());
+        var targets = bindableView.getBindingTargets();
+        this.bindingTargets.addAll(targets);
+        targets.forEach(this::updateBindingTargetTooltip);
     }
     public void removeBindingTargets(BindableView bindableView) {
-        this.bindingTargets.removeAll(bindableView.getBindingTargets());
+        var targets = bindableView.getBindingTargets();
+        this.bindingTargets.removeAll(targets);
+        targets.forEach(this::updateBindingTargetTooltip);
     }
 
     private Map<BindingSubscription, Path> bindingSubscriptions = new HashMap<>();
+
+    private Stream<BindingSubscription> getBindingSubscriptions(Predicate<BindingSubscription> filter) {
+        return bindingSubscriptions.keySet().stream().filter(filter);
+    }
+    private Stream<BindingSubscription> getBindingSubscriptions(BindingSource<?> source, BindingTarget<?> target) {
+        return getBindingSubscriptions(subscription -> (source == null || source == subscription.source()) && (target == null || target == subscription.target()));
+    }
 
     public Optional<BindingSource<?>> findSourceForTarget(BindingTarget<?> bindingTarget) {
         return bindingSources
@@ -78,6 +96,35 @@ public class BindingController {
             targetProperty.setValue(value);
         });
         bindingSubscriptions.put(new BindingSubscription(bindingSource, bindingTarget, subscription), path);
+        updateBindingSourceTooltip(bindingSource);
+        updateBindingTargetTooltip(bindingTarget);
+    }
+
+    private void updateBindingSourceTooltip(BindingSource<?> bindingSource) {
+        updateBindingsTooltip(bindingSource.sourceNode());
+    }
+    private void updateBindingTargetTooltip(BindingTarget<?> bindingTarget) {
+        updateBindingsTooltip(bindingTarget.targetNode());
+    }
+
+    private final static String SOURCE_TOOLTIP_FORMAT = "Source of %s, bound to %s target(s)";
+    private final static String TARGET_TOOLTIP_FORMAT = "Target for %s, bound to %s source(s)";
+
+    private void updateBindingsTooltip(Node node) {
+        if (node instanceof Control control) {
+            StringBuilder tooltip = new StringBuilder();
+            bindingSources.stream().filter(bs -> bs.sourceNode() == node).forEach(bs -> appendTooltip(tooltip, SOURCE_TOOLTIP_FORMAT, bs.sourceClass().getSimpleName(), getBindingSubscriptions(bs, null).count()));
+            bindingTargets.stream().filter(bt -> bt.targetNode() == node).forEach(bt -> appendTooltip(tooltip, TARGET_TOOLTIP_FORMAT, bt.targetClass().getSimpleName(), getBindingSubscriptions(null, bt).count()));
+            if (tooltip.length() > 0) {
+                control.setTooltip(new Tooltip(tooltip.toString()));
+            }
+        }
+    }
+    private void appendTooltip(StringBuilder tooltip, String format, Object... args) {
+        if (tooltip.length() > 0) {
+            tooltip.append("\n");
+        }
+        tooltip.append(format.formatted(args));
     }
 
     public void removeBinding(BindingSubscription bindingSubscription) {
@@ -87,18 +134,16 @@ public class BindingController {
         bindingSubscriptions.remove(bindingSubscription);
     }
 
-    public void removeBindings(Predicate<BindingSubscription> filter) {
-        var subscriptions = bindingSubscriptions.keySet().stream().filter(filter).toList();
-        subscriptions.forEach(this::removeBinding);
-    }
     public void removeBindings(BindingSource<?> source, BindingTarget<?> target) {
-        removeBindings(subscription -> (source == null || source == subscription.source()) && (target == null || target == subscription.target()));
+        getBindingSubscriptions(source, target).forEach(this::removeBinding);
     }
     public void removeBindings(BindingSource<?> source) {
         removeBindings(source, null);
+        updateBindingSourceTooltip(source);
     }
     public void removeBindings(BindingTarget<?> target) {
         removeBindings(null, target);
+        updateBindingTargetTooltip(target);
     }
     public void removeBindings(BindableView bindableView) {
         bindableView.getBindingSources().forEach(this::removeBindings);
