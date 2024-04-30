@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+<?import org.controlsfx.control.PropertySheet?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.huggingface.fx.HuggingfaceChatModelViewController">
+    <PropertySheet fx:id="huggingfaceChatModelPropertySheet"/>
+    <HBox>
+        <Button fx:id="chatModelAction" text="Create Chat model" onAction="#createAndUpdateChatModel"/>
+    </HBox>
+</VBox>

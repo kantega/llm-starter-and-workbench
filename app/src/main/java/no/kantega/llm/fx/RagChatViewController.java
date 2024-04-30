@@ -38,10 +38,14 @@ public class RagChatViewController extends AbstractChatViewController implements
         return chatMemory;
     }
 
-    private ChatbotAgent chatbotAgent;
+    private StreamingChatbotAgent chatbotAgent;
 
     @Override
     protected ChatbotAgent getChatbotAgent() {
+        return null;
+    }
+    @Override
+    protected StreamingChatbotAgent getStreamingChatbotAgent() {
         return chatbotAgent;
     }
 
@@ -85,7 +89,7 @@ public class RagChatViewController extends AbstractChatViewController implements
         return bindingTargets;
     }
 
-    private Map<StreamingChatLanguageModel, ChatbotAgent> aiServices = new HashMap<>();
+    private Map<StreamingChatLanguageModel, StreamingChatbotAgent> aiServices = new HashMap<>();
     
     private Property<TextSegmentEmbeddings> textSegmentEmbeddingsProperty = new SimpleObjectProperty<TextSegmentEmbeddings>();
     
@@ -95,7 +99,7 @@ public class RagChatViewController extends AbstractChatViewController implements
         if (chatModel != null && textSegmentEmbeddings != null) {
             var embeddingStore = EmbeddingsSearchViewController.getEmbeddingStore(textSegmentEmbeddings);
             var contentRetriever = new EmbeddingStoreContentRetriever(embeddingStore, textSegmentEmbeddings.embeddingModel(), 5, 0.5);
-            chatbotAgent = aiServices.computeIfAbsent(chatModel, cm -> AiServices.builder(ChatbotAgent.class)
+            chatbotAgent = aiServices.computeIfAbsent(chatModel, cm -> AiServices.builder(StreamingChatbotAgent.class)
                 .streamingChatLanguageModel(cm)
                 .chatMemory(chatMemory)
                 .contentRetriever(contentRetriever)

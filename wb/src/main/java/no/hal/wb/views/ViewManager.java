@@ -248,7 +248,9 @@ public class ViewManager {
             .map(viewProvider -> {
                 var menuItem = new MenuItem(textFormat.formatted(viewProvider.getViewInfo().viewTitle()));
                 var providerId = viewProvider.getViewInfo().viewProviderId();
-                menuItem.setOnAction(event -> addViewUsingPlaceholder(providerId));
+                menuItem.setOnAction(event -> {
+                    addViewUsingPlaceholder(providerId);
+                });
                 return menuItem;
             })
             .toList();

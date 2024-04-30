@@ -3,12 +3,12 @@ package no.kantega.llm.fx;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 
 import dev.langchain4j.data.message.AiMessage;
 import dev.langchain4j.data.message.SystemMessage;
 import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
+import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
 import dev.langchain4j.service.AiServices;
 import jakarta.enterprise.context.Dependent;
@@ -37,11 +37,15 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
         return chatMemory;
     }
 
-    private ChatbotAgent chatbotAgent;
+    private Object chatbotAgent;
 
     @Override
     protected ChatbotAgent getChatbotAgent() {
-        return chatbotAgent;
+        return getChatbotAgent(chatbotAgent);
+    }
+    @Override
+    protected StreamingChatbotAgent getStreamingChatbotAgent() {
+        return getStreamingChatbotAgent(chatbotAgent);
     }
 
     @FXML
@@ -64,7 +68,8 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
     @Inject
     Instance<LabelAdapter<?>> labelAdapters;
 
-    private Property<StreamingChatLanguageModel> chatModelProperty = new SimpleObjectProperty<StreamingChatLanguageModel>();
+    private Property<ChatLanguageModel> chatModelProperty = new SimpleObjectProperty<ChatLanguageModel>();
+    private Property<StreamingChatLanguageModel> streamingChatModelProperty = new SimpleObjectProperty<StreamingChatLanguageModel>();
         
     private String systemPrompt = """
         You are a simple chatbot.
@@ -84,7 +89,28 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
         return bindingTargets;
     }
 
-    private Map<StreamingChatLanguageModel, ChatbotAgent> aiServices = new HashMap<>();
+    private Map<ChatLanguageModel, ChatbotAgent> chatServices = new HashMap<>();
+    private Map<StreamingChatLanguageModel, StreamingChatbotAgent> streamingChatServices = new HashMap<>();
+
+    private void updateChatbotAgent(Object chatModel) {
+        switch (chatModel) {
+            case ChatLanguageModel clm -> {
+                chatbotAgent = chatServices.computeIfAbsent(clm, ignore -> AiServices.builder(ChatbotAgent.class)
+                    .chatLanguageModel(clm)
+                    .chatMemory(chatMemory)
+                    .build()
+                );
+            }
+            case StreamingChatLanguageModel sclm -> {
+                chatbotAgent = streamingChatServices.computeIfAbsent(sclm, ignore -> AiServices.builder(StreamingChatbotAgent.class)
+                    .streamingChatLanguageModel(sclm)
+                    .chatMemory(chatMemory)
+                    .build()
+                );
+            }
+            case null, default -> {}
+        }
+    }
 
     @FXML
     void initialize() {
@@ -96,24 +122,25 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
             .build();
         chatMemory.add(new SystemMessage(systemPrompt));
 
-        chatModelProperty.subscribe(cm -> {
-            if (cm != null) {
-                chatbotAgent = aiServices.computeIfAbsent(cm, cm2 -> AiServices.builder(ChatbotAgent.class)
-                    .streamingChatLanguageModel(cm2)
-                    .chatMemory(chatMemory)
-                    .build()
-                );
-            }
-        });
-        systemPromptText.textProperty().subscribe(text -> handleRestartChat());
+        LabelAdapter<Object> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
 
         String sendUserMessageActionTextFormat = sendUserMessageAction.getText();
-        LabelAdapter<StreamingChatLanguageModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
-        var computedLabelValue = chatModelProperty.map(cm -> sendUserMessageActionTextFormat.formatted(labelAdapter.getText(cm)));
-        sendUserMessageAction.textProperty().bind(computedLabelValue.orElse(sendUserMessageActionTextFormat.formatted("?")));
+        chatModelProperty.subscribe(cm -> {
+            updateChatbotAgent(cm);
+            var label = labelAdapter.getText(cm);
+            sendUserMessageAction.setText(sendUserMessageActionTextFormat.formatted(label != null ? label : "?"));
+        });
+        streamingChatModelProperty.subscribe(cm -> {
+            updateChatbotAgent(cm);
+            var label = labelAdapter.getText(cm);
+            sendUserMessageAction.setText(sendUserMessageActionTextFormat.formatted(label != null ? label : "?"));
+        });
+
+        systemPromptText.textProperty().subscribe(text -> handleRestartChat());
 
         bindingTargets = List.of(
-            new BindingTarget<StreamingChatLanguageModel>(sendUserMessageAction, StreamingChatLanguageModel.class, chatModelProperty)
+            new BindingTarget<ChatLanguageModel>(sendUserMessageAction, ChatLanguageModel.class, chatModelProperty),
+            new BindingTarget<StreamingChatLanguageModel>(sendUserMessageAction, StreamingChatLanguageModel.class, streamingChatModelProperty)
         );
         bindingSources = List.of(
             new BindingSource<ChatMemoryUpdate>(this.aiMessageText, ChatMemoryUpdate.class, chatMemoryUpdateProperty())
@@ -136,7 +163,10 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
         userMessageText.setText("");
         aiMessageText.setText("");
         chatMemory.clear();
-        chatMemory.add(new SystemMessage(systemPromptText.getText()));
+        String systemPrompt = systemPromptText.getText();
+        if (systemPrompt != null && (! systemPrompt.isBlank())) {
+            chatMemory.add(new SystemMessage(systemPrompt));
+        }
         chatMemoryUpdated(null);
     }
 }

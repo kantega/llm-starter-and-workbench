@@ -22,7 +22,7 @@ import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
-import no.kantega.ollama.OllamaServices;
+import no.kantega.ollama.OllamaService;
 import no.kantega.ollama.rest.OllamaApi;
 
 @Dependent
@@ -94,7 +94,7 @@ public class OllamaModelsViewController implements BindableView {
     }
     
     @Inject
-    OllamaServices ollamaServices;
+    OllamaService ollamaServices;
 
     // @FXML
     // void createAndUpdateChatModel() {

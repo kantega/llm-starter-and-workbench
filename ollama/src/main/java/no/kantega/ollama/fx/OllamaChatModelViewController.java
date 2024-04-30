@@ -10,9 +10,7 @@ import org.controlsfx.control.PropertySheet.Item;
 import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.PropertyEditor;
 
-import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.ollama.OllamaChatModel;
 import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
@@ -32,7 +30,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
-import no.kantega.ollama.OllamaServices;
+import no.kantega.ollama.OllamaService;
 
 @Dependent
 public class OllamaChatModelViewController implements BindableView {
@@ -49,10 +47,10 @@ public class OllamaChatModelViewController implements BindableView {
     // private Property<ChatLanguageModel> chatModelProperty = new SimpleObjectProperty<>();
     private Property<StreamingChatLanguageModel> streamingChatModelProperty = new SimpleObjectProperty<>();
 
-    private OllamaServices ollamaServices;
+    private OllamaService ollamaServices;
 
     @Inject
-    void setOllamaServices(OllamaServices ollamaServices) {
+    void setOllamaServices(OllamaService ollamaServices) {
         this.ollamaServices = ollamaServices;
         baseUrlProperty.setValue(ollamaServices.getBaseUrl());
     }

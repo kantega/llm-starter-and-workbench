@@ -31,7 +31,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
-import no.kantega.openai.OpenaiServices;
+import no.kantega.openai.OpenaiService;
 
 @Dependent
 public class OpenaiChatModelViewController implements BindableView {
@@ -44,10 +44,10 @@ public class OpenaiChatModelViewController implements BindableView {
 
     private Property<StreamingChatLanguageModel> streamingChatModelProperty = new SimpleObjectProperty<>();
 
-    private OpenaiServices openaiServices;
+    private OpenaiService openaiServices;
     
     @Inject
-    public void setOpenaiServices(OpenaiServices openaiServices) {
+    public void setOpenaiServices(OpenaiService openaiServices) {
         this.openaiServices = openaiServices;
         temperatureProperty.setValue(openaiServices.getTemperature());
     }

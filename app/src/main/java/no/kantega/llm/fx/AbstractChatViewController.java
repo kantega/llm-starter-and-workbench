@@ -28,6 +28,14 @@ public abstract class AbstractChatViewController {
     }
 
     protected abstract ChatbotAgent getChatbotAgent();
+    protected abstract StreamingChatbotAgent getStreamingChatbotAgent();
+
+    protected ChatbotAgent getChatbotAgent(Object chatbotAgent) {
+        return chatbotAgent instanceof ChatbotAgent cba ? cba : null;
+    }
+    protected StreamingChatbotAgent getStreamingChatbotAgent(Object chatbotAgent) {
+        return chatbotAgent instanceof StreamingChatbotAgent scba ? scba : null;
+    }
 
     private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
 
@@ -57,6 +65,9 @@ public abstract class AbstractChatViewController {
     }
 
     interface ChatbotAgent {
+        String answer(String query);
+    }
+    interface StreamingChatbotAgent {
         TokenStream answer(String query);
     }
 
@@ -64,22 +75,31 @@ public abstract class AbstractChatViewController {
     Logger logger;
 
     void handleSendUserMessage(String userMessage, Object eventSource) {
+        System.out.println("Sending user message: " + userMessage);
         getAiMessageTextControl().setText("");
-        buttonActionProgressHelper.performStreamingAction(eventSource, callback -> {
-            getChatbotAgent().answer(userMessage)
-                .onNext(nextToken -> {
-                    callback.call(null);
-                    Platform.runLater(() -> handleNextAiMessageToken(nextToken));
-                })
-                .onComplete(answer -> {
-                    callback.call(true);
-                    Platform.runLater(() -> handleCompleteAiMessage(answer.content()));
-                })
-                .onError(ex -> {
-                    logger.error(ex);
-                    callback.call(false);
-                })
-                .start();
-            });
+        if (getStreamingChatbotAgent() != null) {
+            buttonActionProgressHelper.performStreamingAction(eventSource, callback -> {
+                getStreamingChatbotAgent().answer(userMessage)
+                    .onNext(nextToken -> {
+                        callback.call(null);
+                        Platform.runLater(() -> handleNextAiMessageToken(nextToken));
+                    })
+                    .onComplete(answer -> {
+                        callback.call(true);
+                        Platform.runLater(() -> handleCompleteAiMessage(answer.content()));
+                    })
+                    .onError(ex -> {
+                        logger.error(ex);
+                        callback.call(false);
+                    })
+                    .start();
+                });
+        } else if (getChatbotAgent() != null) {
+            buttonActionProgressHelper.performAction(eventSource,
+                () -> getChatbotAgent().answer(userMessage),
+                answer -> handleCompleteAiMessage(AiMessage.from(answer)),
+                ex -> getAiMessageTextControl().setText(ex.getMessage())
+            );
+        }
     }
 }

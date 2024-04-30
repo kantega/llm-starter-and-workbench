@@ -8,14 +8,14 @@ import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import no.hal.fx.adapter.ChildrenAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.kantega.ollama.OllamaServices;
+import no.kantega.ollama.OllamaService;
 import no.kantega.ollama.rest.OllamaApi;
 
 @ApplicationScoped
 public class FxProviders {
 
     @Inject
-    OllamaServices ollamaServices;
+    OllamaService ollamaServices;
 
     @Produces
     LabelAdapter<OllamaEmbeddingModel> labelAdapterForOllamaEmbeddingModel() {

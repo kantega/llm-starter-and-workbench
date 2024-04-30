@@ -2,11 +2,14 @@ package no.kantega.llm.fx;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiConsumer;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
+import dev.langchain4j.store.embedding.EmbeddingSearchRequest;
+import dev.langchain4j.store.embedding.EmbeddingSearchResult;
 import dev.langchain4j.store.embedding.EmbeddingStore;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import jakarta.enterprise.context.Dependent;
@@ -65,7 +68,19 @@ public class EmbeddingsSearchViewController implements BindableView {
     }
 
     static EmbeddingStore<TextSegment> getEmbeddingStore(TextSegmentEmbeddings textSegmentEmbeddings) {
-        EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
+        return getEmbeddingStore(textSegmentEmbeddings, null);
+    }
+    static EmbeddingStore<TextSegment> getEmbeddingStore(TextSegmentEmbeddings textSegmentEmbeddings, BiConsumer<EmbeddingSearchRequest, EmbeddingSearchResult<TextSegment>> searchCallback) {
+        EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>() {
+            @Override
+            public EmbeddingSearchResult<TextSegment> search(EmbeddingSearchRequest request) {
+                var result = super.search(request);
+                if (searchCallback != null) {
+                    searchCallback.accept(request, result);
+                }
+                return result;
+            }
+        };
         textSegmentEmbeddings.textSegmentEmbeddings().forEach(textSegmentEmbedding -> embeddingStore.add(textSegmentEmbedding.embedding(), textSegmentEmbedding.textSegment()));
         return embeddingStore;
     }

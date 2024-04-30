@@ -25,6 +25,7 @@
         <module>llm</module>
         <module>ollama</module>
         <module>openai</module>
+        <module>huggingface</module>
         <module>app</module>
     </modules>
 

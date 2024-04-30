@@ -16,7 +16,7 @@ import javafx.scene.control.ListView;
 import no.hal.fx.adapter.LabelAdapter;
 import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
-import no.kantega.openai.OpenaiServices;
+import no.kantega.openai.OpenaiService;
 
 @Dependent
 public class OpenaiChatModelsViewController implements BindableView {
@@ -58,7 +58,7 @@ public class OpenaiChatModelsViewController implements BindableView {
     }
 
     @Inject
-    OpenaiServices openaiServices;
+    OpenaiService openaiServices;
 
     // @FXML
     // void createAndUpdateChatModel() {

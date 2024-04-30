@@ -7,6 +7,11 @@ import java.util.function.Function;
 public class LabelMap<L, T> implements Function<T, L> {
     
     private Map<L, T> labels = new WeakHashMap<>();
+    
+    @Override
+    public String toString() {
+        return labels.toString();
+    }
 
     public T getLabeled(L label, Function<L, T> creator) {
         return labels.computeIfAbsent(label, creator);
@@ -19,6 +24,10 @@ public class LabelMap<L, T> implements Function<T, L> {
             }
         }
         return null;
+    }
+
+    public void setLabel(L label, T labeled) {
+        labels.put(label, labeled);
     }
 
     @Override

@@ -15,7 +15,7 @@ import jakarta.enterprise.inject.Produces;
 import no.hal.fx.util.LabelMap;
 
 @ApplicationScoped
-public class OllamaServices {
+public class OllamaService {
 
     @ConfigProperty(name = "quarkus.rest-client.ollama-api.url")
     String baseUrl;

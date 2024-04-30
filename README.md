@@ -49,7 +49,7 @@ Built it with `mvn install` and run with `mvn quarkus:dev -f app`.
 
 ### Views
 
-The **View** menu has entries for each kind of view, select to create a new view.
+The **View** menu has entries for each kind of view, organized by categoru. Select an entry to create a new view.
 
 #### Embedding models view
 Lists all available embedding models, and the selection may be linked to views that need an embedding model.

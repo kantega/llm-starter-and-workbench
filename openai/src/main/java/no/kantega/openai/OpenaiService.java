@@ -15,7 +15,7 @@ import jakarta.enterprise.inject.Produces;
 import no.hal.fx.util.LabelMap;
 
 @ApplicationScoped
-public class OpenaiServices {
+public class OpenaiService {
 
     @ConfigProperty(name = "langchain4j.openai.api-key")
     String openApiKey;

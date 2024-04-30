@@ -6,13 +6,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import no.hal.fx.adapter.LabelAdapter;
-import no.kantega.openai.OpenaiServices;
+import no.kantega.openai.OpenaiService;
 
 @ApplicationScoped
 public class FxProviders {
 
     @Inject
-    OpenaiServices openaiServices;
+    OpenaiService openaiServices;
 
     @Produces
     LabelAdapter<OpenAiEmbeddingModel> labelAdapterForOpenaiEmbeddingModel() {
