@@ -32,6 +32,16 @@ public class ViewProviders {
     }
 
     @Produces
+    ViewProvider chatLanguageModelsView() {
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.ChatLanguageModelsView", "Chat models", "Chat models"), fxmlLoaderProvider, "/no/kantega/llm/fx/ChatLanguageModelsView.fxml");
+    }
+
+    @Produces
+    ViewProvider streamingChatLanguageModelsView() {
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.StreamingChatLanguageModelsView", "Streaming chat models", "Streaming chat models"), fxmlLoaderProvider, "/no/kantega/llm/fx/StreamingChatLanguageModelsView.fxml");
+    }
+
+    @Produces
     ViewProvider simpleChatView() throws IOException {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.SimpleChatView", "Simple chat", "Chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/SimpleChatView.fxml");
     }

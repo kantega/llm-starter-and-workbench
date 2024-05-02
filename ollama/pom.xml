@@ -21,6 +21,11 @@
     <dependencies>
         <dependency>
             <groupId>no.kantega.llmwb</groupId>
+            <artifactId>llmwb-llm</artifactId>
+            <version>DEV-SNAPSHOT</version>                    
+        </dependency>
+        <dependency>
+            <groupId>no.kantega.llmwb</groupId>
             <artifactId>wb-fx</artifactId>
             <version>DEV-SNAPSHOT</version>                    
         </dependency>

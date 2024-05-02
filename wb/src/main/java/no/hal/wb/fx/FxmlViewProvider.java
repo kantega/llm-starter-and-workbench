@@ -32,8 +32,8 @@ public class FxmlViewProvider implements ViewProvider {
         try {
             Parent parent = fxmlLoader.load();
             return new Instance(fxmlLoader.getController(), parent);
-        } catch (IOException ioe) {
-            throw new RuntimeException(ioe);
+        } catch (Exception ex) {
+            throw new RuntimeException("Exception when loading FXML from " + fxmlPath, ex);
         }
     }
 }

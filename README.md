@@ -49,28 +49,42 @@ Built it with `mvn install` and run with `mvn quarkus:dev -f app`.
 
 ### Views
 
-The **View** menu has entries for each kind of view, organized by categoru. Select an entry to create a new view.
+The **View** menu has entries for each kind of view, organized by category. Select an entry to create a new view.
 
 #### Embedding models view
 Lists all available embedding models, and the selection may be linked to views that need an embedding model.
 
 <img src="readme-files/embedding-models-view.png" alt="Embedding models view" width="250"/>
 
-#### Chat models view
-Lists all available chat (language) models, with separate lists for ordinary and streaming ones.
-The selection may be linked to views that need a chat model. Note that currently all chat views use the streaming variant, so select in the corresponding list.
+#### Chat and streaming chat models view
+Lists all available chat or streaming chat (language) models, respectively.
+The selection may be linked to views that need a chat model.
+
+To create the models, you must use a more particular view, e.g. **Olama models view**.
 
 <img src="readme-files/chat-models-view.png" alt="Chat models view" width="250"/>
 
-#### Ollama chat model view
+#### Ollama models view
 Create a new ollama (streaming) chat model with specific attributes. This allows to experiment with different settings, like temperature.
-The view may be linked to views that need a chat model.
+
+Created models will appear in the corresponding model view, e.g. **Streaming chat model view**.
 
 <img src="readme-files/ollama-chat-model-view.png" alt="Ollama chat model view" width="200"/>
 
+#### OpenAi models view
+Create a new open ai (streaming) chat model with specific attributes. This allows to experiment with different settings, like temperature.
+
+Created models will appear in the corresponding model view, e.g. **Streaming chat model view**.
+
+#### Hugging face models view
+Create a new hugging face chat model with specific attributes. This allows to experiment with different settings, like temperature.
+
+Created models will appear in the corresponding model view, e.g. **Chat model view**.
+
 #### Simple chat view
-Allows to chat with a (streaming) chat language model.
-It shows the last answer, open and link to a **Chat memory** view to see the whole dialog.
+Allows to chat with a (streaming) chat language model, typically selected in the **Streaming chat model view**.
+
+The view shows the last answer. Open and link to a **Chat memory** view to see the whole dialog.
 
 <img src="readme-files/simple-chat-view.png" alt="Simple chat view" width="600"/>
 

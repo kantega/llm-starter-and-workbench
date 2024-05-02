@@ -6,13 +6,13 @@ import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
 import jakarta.inject.Inject;
 import no.hal.fx.adapter.LabelAdapter;
-import no.kantega.openai.OpenaiService;
+import no.kantega.llm.ModelManager;
 
 @ApplicationScoped
 public class FxProviders {
 
     @Inject
-    OpenaiService openaiServices;
+    ModelManager modelManager;
 
     @Produces
     LabelAdapter<OpenAiEmbeddingModel> labelAdapterForOpenaiEmbeddingModel() {
@@ -20,6 +20,6 @@ public class FxProviders {
     }
     @Produces
     LabelAdapter<OpenAiStreamingChatModel> labelAdapterForOpenaiStreamingChatModel() {
-        return LabelAdapter.forClass(OpenAiStreamingChatModel.class, cm -> "Openai %s streaming chat model".formatted(openaiServices.getStreamingChatModelName(cm)));
+        return LabelAdapter.forClass(OpenAiStreamingChatModel.class, cm -> "Openai %s streaming chat model".formatted(modelManager.getModelName(cm)));
     }
 }

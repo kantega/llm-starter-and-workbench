@@ -75,7 +75,6 @@ public abstract class AbstractChatViewController {
     Logger logger;
 
     void handleSendUserMessage(String userMessage, Object eventSource) {
-        System.out.println("Sending user message: " + userMessage);
         getAiMessageTextControl().setText("");
         if (getStreamingChatbotAgent() != null) {
             buttonActionProgressHelper.performStreamingAction(eventSource, callback -> {

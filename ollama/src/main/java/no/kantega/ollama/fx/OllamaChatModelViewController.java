@@ -1,6 +1,5 @@
 package no.kantega.ollama.fx;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.SequencedCollection;
 import java.util.function.Consumer;
@@ -10,50 +9,30 @@ import org.controlsfx.control.PropertySheet.Item;
 import org.controlsfx.property.editor.AbstractPropertyEditor;
 import org.controlsfx.property.editor.PropertyEditor;
 
-import dev.langchain4j.model.chat.StreamingChatLanguageModel;
-import dev.langchain4j.model.ollama.OllamaStreamingChatModel;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import javafx.beans.property.DoubleProperty;
 import javafx.beans.property.IntegerProperty;
-import javafx.beans.property.Property;
 import javafx.beans.property.SimpleDoubleProperty;
 import javafx.beans.property.SimpleIntegerProperty;
-import javafx.beans.property.SimpleObjectProperty;
 import javafx.beans.property.SimpleStringProperty;
 import javafx.beans.property.StringProperty;
 import javafx.beans.value.ObservableValue;
 import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
-import no.hal.fx.bindings.BindableView;
-import no.hal.fx.bindings.BindingSource;
-import no.kantega.ollama.OllamaService;
+import no.kantega.llm.ModelManager;
+import no.kantega.ollama.OllamaModels;
 
 @Dependent
-public class OllamaChatModelViewController implements BindableView {
+public class OllamaChatModelViewController {
 
     @FXML
     PropertySheet ollamaChatModelPropertySheet;
 
-    // @FXML
-    // Button chatModelAction;
-
-    @FXML
-    Button streamingChatModelAction;
-
-    // private Property<ChatLanguageModel> chatModelProperty = new SimpleObjectProperty<>();
-    private Property<StreamingChatLanguageModel> streamingChatModelProperty = new SimpleObjectProperty<>();
-
-    private OllamaService ollamaServices;
-
     @Inject
-    void setOllamaServices(OllamaService ollamaServices) {
-        this.ollamaServices = ollamaServices;
-        baseUrlProperty.setValue(ollamaServices.getBaseUrl());
-    }
+    ModelManager modelManager;
 
     private StringProperty baseUrlProperty = new SimpleStringProperty("http://localhost:11434/");
     private StringProperty modelNameProperty = new SimpleStringProperty();
@@ -64,13 +43,6 @@ public class OllamaChatModelViewController implements BindableView {
     private IntegerProperty seedProperty = new SimpleIntegerProperty(0);
     private IntegerProperty numPredictProperty = new SimpleIntegerProperty(128);
     private IntegerProperty numCtxProperty = new SimpleIntegerProperty(2048);
-
-    private List<BindingSource<?>> bindingSources;
-
-    @Override
-    public List<BindingSource<?>> getBindingSources() {
-        return this.bindingSources;
-    }
 
     private record PropertySheetItem<T>(String name, Class<T> clazz, ObservableValue<? super T> property, Consumer<Object> setter) implements PropertySheet.Item {
         @Override
@@ -130,46 +102,23 @@ public class OllamaChatModelViewController implements BindableView {
             new PropertySheetItem<Integer>("Token count to predict", Integer.class, numPredictProperty, value -> numPredictProperty.setValue((Integer) value)),
             new PropertySheetItem<Integer>("Token context size", Integer.class, numCtxProperty, value -> numCtxProperty.setValue((Integer) value))
         );
-        this.bindingSources = List.of(
-            // new BindingSource<ChatLanguageModel>(this.chatModelAction, ChatLanguageModel.class, chatModelProperty),
-            new BindingSource<StreamingChatLanguageModel>(this.streamingChatModelAction, StreamingChatLanguageModel.class, streamingChatModelProperty)
-        );
     }
-    
-    // @FXML
-    // void createAndUpdateChatModel() {
-    //     var modelName = modelNameProperty.getValue();
-    //     var chatModel = ollamaServices.withChatModelLabel(modelName, name -> OllamaChatModel.builder()
-    //         .baseUrl(baseUrlProperty.getValue())
-    //         .modelName(name)
-    //         .temperature(temperatureProperty.getValue())
-    //         .topK(topKProperty.getValue())
-    //         .topP(topPProperty.getValue())
-    //         .repeatPenalty(repeatPenaltyProperty.getValue())
-    //         .seed(seedProperty.getValue())
-    //         .numPredict(numPredictProperty.getValue())
-    //         .numCtx(numCtxProperty.getValue())
-    //         .build()
-    //     );
-    //     chatModelProperty.setValue(chatModel);
-    // }
 
     @FXML
-    void createAndUpdateStreamingChatModel() {
-        var modelName = modelNameProperty.getValue();
-        var chatModel = ollamaServices.withStreamingChatModelLabel(modelName, name -> OllamaStreamingChatModel.builder()
-            .baseUrl(baseUrlProperty.getValue())
-            .modelName(name)
-            .temperature(temperatureProperty.getValue())
-            .topK(topKProperty.getValue())
-            .topP(topPProperty.getValue())
-            .repeatPenalty(repeatPenaltyProperty.getValue())
-            .seed(seedProperty.getValue())
-            .numPredict(numPredictProperty.getValue())
-            .numCtx(numCtxProperty.getValue())
-            .build()
-        );
-        streamingChatModelProperty.setValue(chatModel);
+    void createStreamingChatModel() {
+        modelManager.registerModel(new OllamaModels.StreamingChatModelConfiguration(
+            baseUrlProperty.getValue(),
+            modelNameProperty.getValue(),
+            new OllamaModels.StreamingChatModelOptions(
+                temperatureProperty.getValue(),
+                topKProperty.getValue(),
+                topPProperty.getValue(),
+                repeatPenaltyProperty.getValue(),
+                seedProperty.getValue(),
+                numPredictProperty.getValue(),
+                numCtxProperty.getValue()
+            )
+        ));
     }
 
     public static final <T> PropertyEditor<?> createChoiceEditor(Item property, final ObservableList<T> choices ) {

@@ -1,4 +1,4 @@
-package no.kantega.llm.service;
+package no.kantega.llm;
 
 import java.util.List;
 
@@ -6,12 +6,13 @@ import dev.langchain4j.model.embedding.AllMiniLmL6V2EmbeddingModel;
 import dev.langchain4j.model.embedding.EmbeddingModel;
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
+import no.kantega.llm.ModelConfiguration.Named;
 
 @ApplicationScoped
-public class DefaultServices {
+public class DefaultModels {
 
     @Produces
-    List<EmbeddingModel> getEmbeddingModel() {
-        return List.of(new AllMiniLmL6V2EmbeddingModel());
+    List<ModelConfiguration<EmbeddingModel>> getEmbeddingModel() {
+        return List.of(new Named<EmbeddingModel>("Minimal", new AllMiniLmL6V2EmbeddingModel()));
     }
 }

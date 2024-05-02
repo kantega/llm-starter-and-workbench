@@ -13,7 +13,7 @@
     <!--
         <Button fx:id="chatModelAction" text="Chat model" onAction="#createAndUpdateChatModel"/>
      -->
-        <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createAndUpdateStreamingChatModel"/>
+        <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createStreamingChatModel"/>
     </HBox>
     <fx:include fx:id="openaiChatModelView" source="OpenaiChatModelView.fxml"/>
 </VBox>

@@ -8,9 +8,6 @@
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.ollama.fx.OllamaChatModelViewController">
     <PropertySheet fx:id="ollamaChatModelPropertySheet"/>
     <HBox>
-    <!--
-        <Button fx:id="chatModelAction" text="Chat model" onAction="#createAndUpdateChatModel"/>
-    -->
-        <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createAndUpdateStreamingChatModel"/>
+        <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createStreamingChatModel"/>
     </HBox>
 </VBox>

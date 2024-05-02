@@ -8,6 +8,6 @@
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.huggingface.fx.HuggingfaceChatModelViewController">
     <PropertySheet fx:id="huggingfaceChatModelPropertySheet"/>
     <HBox>
-        <Button fx:id="chatModelAction" text="Create Chat model" onAction="#createAndUpdateChatModel"/>
+        <Button fx:id="chatModelAction" text="Create Chat model" onAction="#createChatModel"/>
     </HBox>
 </VBox>
