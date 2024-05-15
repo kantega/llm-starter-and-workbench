@@ -1,8 +1,8 @@
 image:
   file: .gitpod.dockerfile
 
-tasks:
-  - init: sdk use java 21.0.3-tem
+#tasks:
+#  - init: sdk use java 21.0.3-tem
 
 ports:
   # used by virtual desktop and vnc, supports JavaFX
