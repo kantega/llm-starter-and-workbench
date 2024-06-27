@@ -12,24 +12,27 @@ import dev.langchain4j.model.embedding.EmbeddingModel;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import javafx.application.Platform;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
 import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
 import no.hal.fx.bindings.BindingTarget;
+import no.hal.fx.bindings.BindingsSource;
+import no.hal.fx.bindings.BindingsTarget;
 import no.hal.fx.util.ActionProgressHelper;
 import no.kantega.llm.fx.UriDocumentsViewController.Documents;
 
 @Dependent
-public class IngestorViewController implements BindableView {
+public class IngestorViewController implements BindingsSource, BindingsTarget {
 
     @FXML
     TextField segmentSizeText;
@@ -86,7 +89,7 @@ public class IngestorViewController implements BindableView {
         documentsModelProperty.subscribe(this::updateEmbedActionText);
         embeddingModelProperty.subscribe(this::updateEmbedActionText);
         textSegmentsListView.getItems().subscribe(this::updateEmbedActionText);
-        textSegmentsListView.getItems().subscribe(this::updateEmbedActionText);
+        textSegmentsListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
         textSegmentsListView.getSelectionModel().getSelectedItems().subscribe(this::updateEmbedActionText);
 
         AdapterListView.adapt(this.textSegmentsListView, CompositeLabelAdapter.of(this.labelAdapters));
@@ -121,9 +124,22 @@ public class IngestorViewController implements BindableView {
         var documentSplitter = DocumentSplitters.recursive(Integer.valueOf(segmentSizeText.getText()), Integer.valueOf(segmentOverlapText.getText()));
         var documents = documentsModelProperty.getValue().documents();
         buttonActionProgressHelper.performAction(event,
-            () -> documentSplitter.splitAll(documents),
+            () -> {
+                List<TextSegment> textSegments = new ArrayList<>();
+                for (var document : documents) {
+                    try {
+                        textSegments.addAll(documentSplitter.split(document));
+                    } catch (Exception ex) {
+                        logger.warn("Exception splitting document: " + ex, ex);
+                    }
+                }
+                return textSegments;
+            },
             textSegments -> textSegmentsListView.getItems().setAll(textSegments),
-            ex -> textSegmentsListView.getItems().clear()
+            ex -> {
+                logger.warn("Exception splitting documents: " + ex, ex);
+                textSegmentsListView.getItems().clear();
+            }
         );
     }
 
@@ -138,15 +154,21 @@ public class IngestorViewController implements BindableView {
         }
         EmbeddingModel embeddingModel = embeddingModelProperty.getValue();
         buttonActionProgressHelper.performActions(event, textSegments.size(), progress -> {
-            var textSegmentEmbeddings = new ArrayList<TextSegmentEmbedding>();
-            for (int i = 0; i < textSegments.size(); i++) {
-                var textSegment = textSegments.get(i);
-                var embedding = embeddingModel.embed(textSegment).content();
-                textSegmentEmbeddings.add(new TextSegmentEmbedding(textSegment, embedding));
-                progress.call(i + 1);
+            try {
+                var textSegmentEmbeddings = new ArrayList<TextSegmentEmbedding>();
+                for (int i = 0; i < textSegments.size(); i++) {
+                    var textSegment = textSegments.get(i);
+                    var embedding = embeddingModel.embed(textSegment).content();
+                    textSegmentEmbeddings.add(new TextSegmentEmbedding(textSegment, embedding));
+                    progress.call(i + 1);
+                }
+                progress.call(null);
+                Platform.runLater(() -> allTextSegmentEmbeddingsProperty.setValue(new TextSegmentEmbeddings(embeddingModel, textSegmentEmbeddings)));
+            } catch (Exception e) {
+                logger.error("Error embedding text segments: " + e, e);
+                progress.call(null);
+                return;
             }
-            progress.call(null);
-            allTextSegmentEmbeddingsProperty.setValue(new TextSegmentEmbeddings(embeddingModel, textSegmentEmbeddings));
         });
     }
 }

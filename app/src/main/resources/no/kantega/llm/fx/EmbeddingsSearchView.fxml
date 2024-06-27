@@ -9,6 +9,6 @@
 
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.EmbeddingsSearchViewController">
     <TextArea fx:id="embeddingsText" prefRowCount="5"/>
-    <Button fx:id="embeddingsSearchAction" text="Search with %s" onAction="#handleEmbeddingsSearch"/>
+    <Button fx:id="embeddingsSearchAction" text="Search with %s in %s text segments" onAction="#handleEmbeddingsSearch"/>
     <ListView fx:id="matchesListView" VBox.vgrow="ALWAYS"/>
 </VBox>

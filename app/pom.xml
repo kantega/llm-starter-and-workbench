@@ -28,6 +28,21 @@
     <dependencies>
         <dependency>
             <groupId>no.kantega.llmwb</groupId>
+            <artifactId>llmwb-tables</artifactId>
+            <version>DEV-SNAPSHOT</version>                    
+        </dependency>
+        <dependency>
+            <groupId>no.kantega.llmwb</groupId>
+            <artifactId>llmwb-mvel</artifactId>
+            <version>DEV-SNAPSHOT</version>                    
+        </dependency>
+        <dependency>
+            <groupId>no.kantega.llmwb</groupId>
+            <artifactId>llmwb-janino</artifactId>
+            <version>DEV-SNAPSHOT</version>                    
+        </dependency>
+        <dependency>
+            <groupId>no.kantega.llmwb</groupId>
             <artifactId>llmwb-llm</artifactId>
             <version>DEV-SNAPSHOT</version>                    
         </dependency>
@@ -72,7 +87,7 @@
         <dependency>
             <groupId>io.quarkiverse.fx</groupId>
             <artifactId>quarkus-fx</artifactId>
-            <version>0.4.0</version>
+            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.crawler-commons</groupId>

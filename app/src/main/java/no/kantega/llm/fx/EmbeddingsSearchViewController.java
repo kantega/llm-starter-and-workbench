@@ -15,6 +15,7 @@ import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
@@ -24,12 +25,12 @@ import javafx.scene.control.TextArea;
 import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingTarget;
+import no.hal.fx.bindings.BindingsTarget;
 import no.kantega.llm.fx.IngestorViewController.TextSegmentEmbeddings;
 
 @Dependent
-public class EmbeddingsSearchViewController implements BindableView {
+public class EmbeddingsSearchViewController implements BindingsTarget {
 
     @FXML
     TextArea embeddingsText;
@@ -52,13 +53,23 @@ public class EmbeddingsSearchViewController implements BindableView {
     @FXML
     ListView<EmbeddingMatch<TextSegment>> matchesListView;
 
+    private String embeddingsScoreActionTextFormat;
+    
     @FXML
     void initialize() {
-        String embeddingsScoreActionTextFormat = embeddingsSearchAction.getText();
         LabelAdapter<EmbeddingModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
         embeddingsSearchAction.disableProperty().bind(textSegmentEmbeddingsProperty.map(Objects::isNull));
-        var computedLabelValue = textSegmentEmbeddingsProperty.map(tse -> embeddingsScoreActionTextFormat.formatted(labelAdapter.getText(tse.embeddingModel())));
-        embeddingsSearchAction.textProperty().bind(computedLabelValue.orElse(embeddingsScoreActionTextFormat.formatted("?")));
+        embeddingsScoreActionTextFormat = embeddingsSearchAction.getText();
+        embeddingsSearchAction.textProperty().bind(Bindings.createStringBinding(() -> {
+            String emLabel = "?";
+            var tse = textSegmentEmbeddingsProperty.getValue();
+            String tseLabel = "0";
+            if (tse != null) {
+                emLabel = labelAdapter.getText(tse.embeddingModel());
+                tseLabel = String.valueOf(tse.textSegmentEmbeddings().size());            
+            }
+            return embeddingsScoreActionTextFormat.formatted(emLabel, tseLabel);
+        }, textSegmentEmbeddingsProperty));
 
         AdapterListView.adapt(this.matchesListView, CompositeLabelAdapter.of(this.labelAdapters));
 

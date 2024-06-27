@@ -20,12 +20,15 @@
     </properties>
 
     <modules>
-        <module>fx</module>
+        <module>wb-fx</module>
         <module>wb</module>
         <module>llm</module>
         <module>ollama</module>
         <module>openai</module>
         <module>huggingface</module>
+        <module>tables</module>
+        <module>janino</module>
+        <module>mvel</module>
         <module>app</module>
     </modules>
 

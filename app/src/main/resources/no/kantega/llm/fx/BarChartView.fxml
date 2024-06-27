@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.chart.BarChart?>
+<?import javafx.scene.chart.CategoryAxis?>
+<?import javafx.scene.chart.NumberAxis?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.CategorySummaryXYChartViewController">
+    <HBox>
+        <Label text="Main axis column: "/>
+        <ComboBox fx:id="mainAxisColumnSelector" onAction="#updateChart"/>
+        <Label text="Category column: "/>
+        <ComboBox fx:id="categoryColumnSelector" onAction="#updateChart"/>
+    </HBox>
+    <BarChart fx:id="xyChart" VBox.vgrow="ALWAYS" animated="false">
+        <xAxis>
+            <NumberAxis fx:id="numberAxis"/>
+        </xAxis>
+        <yAxis>
+            <CategoryAxis fx:id="categoryAxis"/>
+        </yAxis>
+    </BarChart>
+</VBox>

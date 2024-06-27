@@ -16,6 +16,6 @@ public class ViewProviders {
 
     @Produces
     ViewProvider ollamaChatModelsView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.OllamaModelsView", "Ollama models"), fxmlLoaderProvider, "/no/kantega/ollama/fx/OllamaModelsView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.OllamaModelsView", "Ollama models", "Chat models"), fxmlLoaderProvider, "/no/kantega/ollama/fx/OllamaModelsView.fxml"){};
     }
 }

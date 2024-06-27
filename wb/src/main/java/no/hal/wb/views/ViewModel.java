@@ -7,6 +7,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonSubTypes;
+import com.fasterxml.jackson.annotation.JsonTypeInfo;
+import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
 import com.panemu.tiwulfx.control.dock.DetachableTabPane;
 
 import javafx.geometry.Orientation;
@@ -18,18 +22,28 @@ import javafx.scene.layout.Pane;
 
 public class ViewModel implements Iterable<ViewInfo> {
 
+    @JsonTypeInfo(use=Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "itemType")
+    @JsonSubTypes({
+        @JsonSubTypes.Type(ContainerItem.class),
+        @JsonSubTypes.Type(ViewItem.class)
+    })
     public sealed interface Item<N extends Node> permits ContainerItem, ViewItem {
         N itemNode();
     }
 
-    public record ContainerItem<N extends Node>(N itemNode, ContainerType<N> type, List<Item<?>> children) implements Item<N> {
+    public record ContainerItem<N extends Node>(@JsonIgnore N itemNode, ContainerType<N> type, List<Item<?>> children) implements Item<N> {
         public ContainerItem(ContainerType<N> type, Item<?>... children) {
             this(null, type, List.of(children));
         }
     }
-    public record ViewItem<N extends Node>(N itemNode, ViewInfo viewInfo) implements Item<N> {
+    public record ViewItem<N extends Node>(@JsonIgnore N itemNode, String viewId) implements Item<N> {
     }
 
+    @JsonTypeInfo(use=Id.CLASS, include = JsonTypeInfo.As.PROPERTY, property = "containerType")
+    @JsonSubTypes({
+        @JsonSubTypes.Type(ContainerType.SplitPaneContainer.class),
+        @JsonSubTypes.Type(ContainerType.TabPaneContainer.class)
+    })
     public sealed interface ContainerType<N extends Node> {
         public record SplitPaneContainer(Orientation orientation) implements ContainerType<SplitPane> {
         }
@@ -70,7 +84,9 @@ public class ViewModel implements Iterable<ViewInfo> {
         views.put(viewInfo.viewId(), viewInfo);
     }
     void unregisterView(ViewInfo viewInfo) {
-        views.put(viewInfo.viewId(), viewInfo);
+        if (views.get(viewInfo.viewId()) == viewInfo) {
+            views.remove(viewInfo.viewId());
+        }
     }
 
     //
@@ -79,7 +95,7 @@ public class ViewModel implements Iterable<ViewInfo> {
         return deriveModel(rootNode);
     }
 
-    private Item<? extends Node> deriveModel(Node node) {
+    public Item<? extends Node> deriveModel(Node node) {
         return switch (node) {
             case SplitPane splitPane -> new ContainerItem<SplitPane>(splitPane,
                 new ContainerType.SplitPaneContainer(splitPane.getOrientation()), deriveModel(splitPane.getItems())
@@ -90,8 +106,9 @@ public class ViewModel implements Iterable<ViewInfo> {
             );
             default -> {
                 var viewInfo = getViewInfo(node);
+                System.out.println("ViewInfo for " + node + ": " + viewInfo);
                 if (viewInfo != null) {
-                    yield new ViewItem<Node>(node, viewInfo);
+                    yield new ViewItem<Node>(node, viewInfo.viewId());
                 }
                 List<Node> children = switch (node) {
                     case Parent parent -> parent.getChildrenUnmodifiable();
@@ -106,6 +123,17 @@ public class ViewModel implements Iterable<ViewInfo> {
                 );
             }
         };
+    }
+
+    private List<Item<? extends Node>> deriveModel(List<? extends Node> children) {
+        var items = new ArrayList<Item<?>>();
+        for (var child : children) {
+            var item = deriveModel(child);
+            if (item != null) {
+                items.add(item);
+            }
+        }
+        return items;
     }
 
     private ViewInfo getViewInfo(Node node) {
@@ -139,17 +167,6 @@ public class ViewModel implements Iterable<ViewInfo> {
             }
         }
         return childNodes;
-    }
-
-    private List<Item<? extends Node>> deriveModel(List<? extends Node> children) {
-        var items = new ArrayList<Item<?>>();
-        for (var child : children) {
-            var item = deriveModel(child);
-            if (item != null) {
-                items.add(item);
-            }
-        }
-        return items;
     }
 
     public <N extends Node> ContainerItem<N> findContainerItem(Class<? extends ContainerType<N>> containerType) {

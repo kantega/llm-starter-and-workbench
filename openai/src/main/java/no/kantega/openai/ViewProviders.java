@@ -16,6 +16,6 @@ public class ViewProviders {
 
     @Produces
     ViewProvider openaiChatModelsView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.OpenaiChatModelsView", "OpenAi chat models", "Chat models"), fxmlLoaderProvider, "/no/kantega/openai/fx/OpenaiChatModelsView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.OpenaiChatModelsView", "OpenAi chat models", "Chat models"), fxmlLoaderProvider, "/no/kantega/openai/fx/OpenaiChatModelsView.fxml"){};
     }
 }

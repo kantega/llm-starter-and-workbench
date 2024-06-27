@@ -1,12 +1,14 @@
 package no.hal.wb.views;
 
+import com.fasterxml.jackson.databind.JsonNode;
+
 import javafx.scene.Node;
 
 public interface ViewProvider {
 
     Info getViewInfo();
     
-    Instance createView();
+    Instance createView(JsonNode configuration);
     
     default boolean supportsDuplicate() {
         return false;
@@ -15,7 +17,7 @@ public interface ViewProvider {
         if (! supportsDuplicate()) {
             throw new UnsupportedOperationException("Cannot duplicate " + getViewInfo().viewProviderId() + " view");
         }
-        return createView();
+        return createView(instance.configuration());
     }
     default void dispose(Instance viewInstance) {
     }
@@ -30,6 +32,6 @@ public interface ViewProvider {
         }
     }
 
-    public record Instance(Object controller, Node viewNode) {
+    public record Instance(Object controller, Node viewNode, JsonNode configuration) {
     }
 }

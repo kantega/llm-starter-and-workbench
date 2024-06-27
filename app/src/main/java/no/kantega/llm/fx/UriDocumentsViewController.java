@@ -34,18 +34,22 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.Alert;
 import javafx.scene.control.Button;
+import javafx.scene.control.ComboBox;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.scene.control.TextInputControl;
 import javafx.stage.DirectoryChooser;
 import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
+import no.hal.fx.bindings.BindingsSource;
 import no.hal.fx.util.ActionProgressHelper;
+import no.kantega.llm.docparse.AbstractJSoupDocumentParser;
 
 @Dependent
-public class UriDocumentsViewController implements BindableView {
+public class UriDocumentsViewController implements BindingsSource {
 
     @FXML
     TextField uriText;
@@ -54,12 +58,18 @@ public class UriDocumentsViewController implements BindableView {
     Button scanForUrisAction;
 
     @FXML
-    TextField pathFilterText;
+    TextInputControl pathFilterText;
     @FXML
-    TextField extensionFilterText;
+    TextInputControl extensionFilterText;
 
     @FXML
     ListView<URI> uriListView;
+
+    @FXML
+    ComboBox<String> documentParserSelector;
+
+    @FXML
+    TextInputControl contentSelectorText;
 
     @FXML
     Button loadDocumentsAction;
@@ -88,13 +98,17 @@ public class UriDocumentsViewController implements BindableView {
         return this.bindingSources;
     }
 
+    private String loadDocumentsActionFormat;
+
     @FXML
     void initialize() {
         allUris = uriListView.getItems();
         filteredUris = new FilteredList<>(allUris);
         uriListView.setItems(filteredUris);
-        String loadDocumentsActionFormat = loadDocumentsAction.getText();
-        filteredUris.subscribe(() -> loadDocumentsAction.setText(loadDocumentsActionFormat.formatted(filteredUris.size())));
+        uriListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
+        loadDocumentsActionFormat = loadDocumentsAction.getText();
+        filteredUris.subscribe(this::updateLoadDocumentsActionText);
+        uriListView.getSelectionModel().getSelectedItems().subscribe(this::updateLoadDocumentsActionText);
         AdapterListView.adapt(this.uriListView, uri -> {
             var baseUriString = getUri(uriText.getText()).toString();
             var uriString = uri.toString();
@@ -104,6 +118,7 @@ public class UriDocumentsViewController implements BindableView {
         pathFilterText.textProperty().subscribe(this::updateUriList);
         extensionFilterText.textProperty().subscribe(this::updateUriList);
 
+        documentParserSelector.getSelectionModel().select(0);
         uriDocumentsProperty.subscribe(uriDocuments -> documentListView.getItems().setAll(uriDocuments.documents()));
 
         AdapterListView.adapt(this.documentListView, CompositeLabelAdapter.of(this.labelAdapters));
@@ -111,6 +126,14 @@ public class UriDocumentsViewController implements BindableView {
             new BindingSource<Documents>(this.documentListView, Documents.class, uriDocumentsProperty)
         );
         updateUriList();
+    }
+
+    private void updateLoadDocumentsActionText() {
+        int uriCount = uriListView.getSelectionModel().getSelectedItems().size();
+        if (uriCount == 0) {
+            uriCount = uriListView.getItems().size();
+        }
+        loadDocumentsAction.setText(loadDocumentsActionFormat.formatted(uriCount));
     }
 
     private void updateUriList() {
@@ -168,9 +191,26 @@ public class UriDocumentsViewController implements BindableView {
     @Inject
     Logger logger;
 
+    @FXML
+    String plainTextLabel;
+
+    @FXML
+    String htmlAsTextLabel;
+
+    @FXML
+    String htmlAsMarkdownLabel;
+
+    @Inject
+    @Named("plain-text")
+    DocumentParser plainTextDocumentParser;
+
     @Inject
     @Named("jsoup+text")
-    DocumentParser documentParser;
+    DocumentParser htmlAsTextDocumentParser;
+
+    @Inject
+    @Named("jsoup+copydown")
+    DocumentParser htmlAsMarkdownDocumentParser;
 
     private ActionProgressHelper buttonActionProgressHelper = new ActionProgressHelper();
 
@@ -207,7 +247,7 @@ public class UriDocumentsViewController implements BindableView {
         try (var stream = Files.walk(Paths.get(filePath))) {
             return stream.filter(Files::isRegularFile).map(Path::toUri).toList();
         } catch (IOException ex) {
-            throw new RuntimeException("Error scanning folder for files", ex);
+            throw new RuntimeException("Exception scanning folder for files: " + ex, ex);
         }
     }
 
@@ -238,12 +278,24 @@ public class UriDocumentsViewController implements BindableView {
 
     @FXML
     void loadDocuments(ActionEvent event) {
-        int uriCount = filteredUris.size();
+        List<URI> uris = new ArrayList<>(uriListView.getSelectionModel().getSelectedItems());
+        if (uris.isEmpty()) {
+            uris.addAll(uriListView.getItems());
+        }
+        int uriCount = uris.size();
+        String selector = documentParserSelector.getValue();
+        DocumentParser documentParser = selector.equals(plainTextLabel) ? plainTextDocumentParser
+            : selector.equals(htmlAsTextLabel) ? htmlAsTextDocumentParser
+            : selector.equals(htmlAsMarkdownLabel) ? htmlAsMarkdownDocumentParser
+            : plainTextDocumentParser; 
+        if (documentParser instanceof AbstractJSoupDocumentParser jsoupParser) {
+            jsoupParser.setContentSelector(contentSelectorText.getText());
+        }
         buttonActionProgressHelper.performActions(event, uriCount, progress -> {
             CountDownLatch latch = new CountDownLatch(uriCount);
             List<Document> documents = Collections.synchronizedList(new ArrayList<>());
             Runnable updater = () -> uriDocumentsProperty.setValue(new Documents(new ArrayList<>(documents)));
-            filteredUris.forEach(uri -> Thread.ofVirtual().start(() -> {
+            uris.forEach(uri -> Thread.ofVirtual().start(() -> {
                 try (var stream = uri.toURL().openStream()) {
                     var document = documentParser.parse(stream);
                     document.metadata().put(Document.URL, uri.toString());

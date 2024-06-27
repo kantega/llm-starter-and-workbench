@@ -23,11 +23,11 @@ import javafx.scene.control.TextArea;
 import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingTarget;
+import no.hal.fx.bindings.BindingsTarget;
 
 @Dependent
-public class EmbeddingsScoreViewController implements BindableView {
+public class EmbeddingsScoreViewController implements BindingsTarget {
 
     @FXML
     TextArea embeddingsText1;

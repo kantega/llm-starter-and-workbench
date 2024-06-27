@@ -16,7 +16,7 @@ public class FxProviders {
 
     @Produces
     LabelAdapter<OpenAiEmbeddingModel> labelAdapterForOpenaiEmbeddingModel() {
-        return LabelAdapter.forClass(OpenAiEmbeddingModel.class, em -> "Openai embedding model");
+        return LabelAdapter.forClass(OpenAiEmbeddingModel.class, em -> "OpenAi's embedding model");
     }
     @Produces
     LabelAdapter<OpenAiStreamingChatModel> labelAdapterForOpenaiStreamingChatModel() {

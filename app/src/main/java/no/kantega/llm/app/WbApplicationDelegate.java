@@ -2,20 +2,25 @@ package no.kantega.llm.app;
 
 import java.io.IOException;
 
+import org.jboss.logmanager.Logger;
+
 import io.quarkiverse.fx.FxStartupEvent;
+import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
 import jakarta.inject.Provider;
+import javafx.application.HostServices;
 import javafx.application.Platform;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import no.kantega.llm.logging.AppLoggingHandler;
 
 public class WbApplicationDelegate {
 
   @Inject
   Provider<FXMLLoader> fxmlLoaderProvider;
-
+  
   @Inject
   WbController wbController;
 
@@ -33,4 +38,12 @@ public class WbApplicationDelegate {
       System.exit(0);
     });
   }
+
+  @Inject
+  AppLoggingHandler appLoggingHandler;
+
+  void onStart(@Observes StartupEvent ev) {
+        Logger llmLogger = Logger.getLogger("no.kantega.llm");
+        llmLogger.addHandler(appLoggingHandler);
+    }
 }

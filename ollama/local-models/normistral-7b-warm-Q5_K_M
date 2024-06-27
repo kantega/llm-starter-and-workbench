@@ -1,0 +1,18 @@
+FROM /Users/hal/Downloads/normistral-7b.fp16.Q5_K_M.gguf
+
+SYSTEM """[INST]Du er en chatbot som svarer på spørsmål.
+    Svar konsist, i en høflig tone og på norsk.[/INST]"""
+
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>bruker
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistent
+"""
+
+PARAMETER stop "<|im_start|>"
+PARAMETER stop "<|im_end|>"
+
+LICENSE """n/a"""
+
+PARAMETER temperature 0.5

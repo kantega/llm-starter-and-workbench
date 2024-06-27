@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Button?>
+<?import javafx.scene.control.ComboBox?>
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.TextField?>
+<?import org.controlsfx.control.tableview2.TableView2?>
+<?import javafx.scene.layout.VBox?>
+<?import javafx.scene.layout.HBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.CsvViewController">
+    <HBox>
+        <TextField fx:id="uriText" promptText="URL or path to local folder with csv" HBox.hgrow="ALWAYS"/>
+        <Button fx:id="loadCsvAction" text="Load csv" onAction="#loadCsv"/>
+        <Button text="File..." onAction="#browseCsvFile"/>
+    </HBox>
+    <TableView2 fx:id="tableView" VBox.vgrow="ALWAYS"/>
+</VBox>

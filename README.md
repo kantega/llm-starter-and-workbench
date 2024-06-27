@@ -5,17 +5,19 @@ This repo is for getting started with large language models (LLMs) using Langcha
 1. a set of JBang 'scripts' that implement variants of pretty minimal chatbots
 2. a workbench for trying out various components and techniques supported by Langchain4J, such as document 'ingestion', embeddings, chat language models and RAG
 
-The scripts give a quick introduction to basic concepts as code. Each script can be run with `jbang <path-to-script>`, e.g. `jbang jbang/MinimalChat.java`.
+The scripts give a quick introduction to basic concepts as code, e.g. `ChatMessage`, `ChatMemory` and `ChatLanguageModel`. Each script can be run with `jbang <path-to-script>`, e.g. `jbang jbang/MinimalChat.java`.
 
-The workbench allows playing around more interactively. Built it with `mvn install` and run with `mvn quarkus:dev -f app` (but note the requirements below).
+The workbench allows playing around more interactively, with all parts of a RAG-based chatbot, by means of a number of specialized views.
+Build it with `mvn install` and run with `mvn quarkus:dev -f app` (but note the requirements below).
 
 ## Requirements
 
-- [Install jbang](https://www.jbang.dev/documentation/guide/latest/installation.html), e.g. using sdkman.
+- [Install jbang](https://www.jbang.dev/documentation/guide/latest/installation.html), e.g. using [sdkman](https://sdkman.io/).
     - If you're using VSCode, consider installing the [JBang extensions](https://github.com/jbangdev/jbang-vscode).
 - Get access to LLM services, at least one of the following:
     - Install [ollama](https://ollama.com/), so you can run LLM services locally.
-    - Register with an LLM service provider, like [openai](https://platform.openai.com/).
+    - Register with an LLM service provider, like [openai](https://platform.openai.com/) or [huggingface](https://huggingface.co/).
+- Edit the [application.properties](app/src/main/resources/application.properties) file as you see fit and define environment necessary variables or create a `.env` file in the `app` for secrets/keys. See [quarkus' configuration documentation](https://quarkus.io/guides/config#secrets-in-environment-properties) for details.
 
 ## JBang scripts
 
@@ -41,8 +43,10 @@ The views are organised in *tab groups*, initially, only some view are shown, bu
 the tabs may be dragged and docked so you can get a layout suitable for your task.
 
 Views may be *linked* so one may provide data to another, e.g.
-the selected *embedding model* in the **Embedding models** may be used by the **Embeddings score** view, by linking them together.
+the selected *embedding model* in the **Embedding models** view may be used by the **Embeddings score** view, by linking them together.
 When a view is opened, it is automatically linked to other views that provide data it needs, but you can link or unlink manually, if needed (see below).
+
+Most views have an info page, right-click on the tab and select the **Info** menu item to check it out.
 
 The workbench is a [JavaFX](https://openjfx.io/) application built on [Quarkus](https://quarkus.io/).
 Built it with `mvn install` and run with `mvn quarkus:dev -f app`.
@@ -51,74 +55,39 @@ Built it with `mvn install` and run with `mvn quarkus:dev -f app`.
 
 The **View** menu has entries for each kind of view, organized by category. Select an entry to create a new view.
 
-#### Embedding models view
-Lists all available embedding models, and the selection may be linked to views that need an embedding model.
+* [Embedding models view](app/src/main/resources/markdown/no.kantega.llm.fx.EmbeddingModelsView.md) - lists all available embedding models
 
-<img src="readme-files/embedding-models-view.png" alt="Embedding models view" width="250"/>
+* [Chat models view](app/src/main/resources/markdown/no.kantega.llm.fx.ChatLanguageModelView.md) - lists all available chat models
 
-#### Chat and streaming chat models view
-Lists all available chat or streaming chat (language) models, respectively.
-The selection may be linked to views that need a chat model.
+* [Streaming chat models view](app/src/main/resources/markdown/no.kantega.llm.fx.StreamingChatLanguageModelView.md) - lists all available streaming chat models
 
-To create the models, you must use a more particular view, e.g. **Olama models view**.
+* [Ollama models view](ollama/src/main/resources/markdown/no.kantega.llm.fx.OllamaModelsView.md) - create new ollama chat models
 
-<img src="readme-files/chat-models-view.png" alt="Chat models view" width="250"/>
+* [OpenAi models view](openai/src/main/resources/markdown/no.kantega.llm.fx.OpenaiChatModelsView.md) - create new open ai chat models
 
-#### Ollama models view
-Create a new ollama (streaming) chat model with specific attributes. This allows to experiment with different settings, like temperature.
+* [Hugging face models view](huggingface/src/main/resources/markdown/no.kantega.llm.fx.HuggingfaceModelView.md) - create new hugging face chat models
 
-Created models will appear in the corresponding model view, e.g. **Streaming chat model view**.
+* [Simple chat view](app/src/main/resources/markdown/no.kantega.llm.fx.SimpleChatView.md) - chat with a (streaming) chat model
 
-<img src="readme-files/ollama-chat-model-view.png" alt="Ollama chat model view" width="200"/>
+* [Chat memory view](app/src/main/resources/markdown/no.kantega.llm.fx.ChatMemoryView.md) - shows the messages in a chat memory
 
-#### OpenAi models view
-Create a new open ai (streaming) chat model with specific attributes. This allows to experiment with different settings, like temperature.
+* [Embeddings score view](app/src/main/resources/markdown/no.kantega.llm.fx.EmbeddingsScoreView.md) - compute and compare (the similarity of) embeddings
 
-Created models will appear in the corresponding model view, e.g. **Streaming chat model view**.
+* [Uri documents view](app/src/main/resources/markdown/no.kantega.llm.fx.UriDocumentsView.md) - load documents, to use as input for the **Ingestor** view
 
-#### Hugging face models view
-Create a new hugging face chat model with specific attributes. This allows to experiment with different settings, like temperature.
+* [Ingestor view](app/src/main/resources/markdown/no.kantega.llm.fx.IngestorView.md) - split documents into text segments and compute their embeddings
 
-Created models will appear in the corresponding model view, e.g. **Chat model view**.
+* [Embeddings search view](app/src/main/resources/markdown/no.kantega.llm.fx.EmbeddingsSearchView.md) - search embeddings for text fragments similar to a sentence
 
-#### Simple chat view
-Allows to chat with a (streaming) chat language model, typically selected in the **Streaming chat model view**.
+* [Rag chat view](app/src/main/resources/markdown/no.kantega.llm.fx.RagChatView.md) - chat with a chat model, using RAG to provide answers
 
-The view shows the last answer. Open and link to a **Chat memory** view to see the whole dialog.
+* [Csv view](app/src/main/resources/markdown/no.kantega.llm.fx.CsvView.md) - load and view csv data
 
-<img src="readme-files/simple-chat-view.png" alt="Simple chat view" width="600"/>
+* [Bar chart view](app/src/main/resources/markdown/no.kantega.llm.fx.BarChartView.md) - view table data as bar chart
 
-#### Chat memory view
-Shows the messages in a chat memory as a list. Link it to one of the chat views to have something to show.
+* [Stacked bar chart view](app/src/main/resources/markdown/no.kantega.llm.fx.StackedBarChartView.md) - view table data as stacked bar chart
 
-<img src="readme-files/chat-memory-view.png" alt="Chat memory view" width="600"/>
-
-#### Embeddings score view
-Allows you to compute and compare (the similarity of) embeddings. The text in the upper text area, is compared to each of line of text in the lower text area. The view needs an embedding model, so you typically want to link it to the **Embedding models** view and select an embedding model there. 
-
-<img src="readme-files/embeddings-score.png" alt="Embeddings score view" width="250"/>
-
-#### File system documents view
-Loads a set of HTML documents from a local folder, so they can be used as input for the **Ingestor** view.
-
-<img src="readme-files/file-system-documents-view.png" alt="File system documents view" width="600"/>
-
-#### Ingestor view
-Splits a set of documents into text segments, computes embeddings and stores them in an embedding store.
-The latter can be used as input for other view, e.g. **Embeddings search** and **Rag chat**.
-
-<img src="readme-files/ingestor-view.png" alt="Ingestor view" width="600"/>
-
-#### Embeddings search view
-Allows you to search an embedding store for text fragments similar to a sentence. The view needs an embedding store, so you typically want to link it to the **Ingestor** view.
-
-<img src="readme-files/embeddings-search.png" alt="Embeddings search view" width="600"/>
-
-The **Rag chat** view ...
-
-Allows to chat with a (streaming) chat language model, and will use an embedding store, e.g. from a linked **Ingestor** view, to improve the answers.
-
-<img src="readme-files/simple-chat-view.png" alt="Simple chat view" width="600"/>
+* [Expression view](app/src/main/resources/markdown/no.kantega.llm.fx.ExpressionView.md) - evaluate expressions
 
 ### Linking views
 

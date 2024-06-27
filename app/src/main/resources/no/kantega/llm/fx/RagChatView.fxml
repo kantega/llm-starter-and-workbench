@@ -21,11 +21,9 @@
         <Tab text="Chat">
             <VBox>
                 <TextArea fx:id="userMessageText" prefRowCount="3"/>
-                <HBox>
-                    <Button fx:id="sendUserMessageAction" text="Send to %s" onAction="#handleSendUserMessage"/>
-                    <Button text="Restart chat" onAction="#handleRestartChat"/>
-                </HBox>
-                <ScrollPane hbarPolicy="NEVER" vbarPolicy="AS_NEEDED">
+                <Button fx:id="sendUserMessageAction" text="Send to %s, retrieving context from %s text segments" onAction="#handleSendUserMessage"/>
+                <Button text="Restart chat" onAction="#handleRestartChat"/>
+                <ScrollPane hbarPolicy="NEVER" vbarPolicy="AS_NEEDED" VBox.vgrow="ALWAYS">
                     <TextArea fx:id="aiMessageText" wrapText="true"/>
                 </ScrollPane>
             </VBox>

@@ -22,13 +22,14 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextInputControl;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
 import no.hal.fx.bindings.BindingTarget;
+import no.hal.fx.bindings.BindingsSource;
+import no.hal.fx.bindings.BindingsTarget;
 import no.kantega.llm.fx.ChatMemoryViewController.ChatMemoryUpdate;
 
 @Dependent
-public class SimpleChatViewController extends AbstractChatViewController implements BindableView {
+public class SimpleChatViewController extends AbstractChatViewController implements BindingsSource, BindingsTarget {
 
     private ChatMemory chatMemory;
 

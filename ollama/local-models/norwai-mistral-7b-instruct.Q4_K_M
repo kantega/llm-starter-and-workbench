@@ -1,0 +1,27 @@
+# File format: https://github.com/ollama/ollama/blob/main/docs/modelfile.md
+# Hugging face: https://huggingface.co/NorwAI
+FROM ~/Downloads/norwai-mistral-7b-instruct.Q4_K_M.gguf
+
+TEMPLATE """{{ if .System }}<|im_start|>system
+{{ .System }}<|im_end|>
+{{ end }}{{ if .Prompt }}<|im_start|>user
+{{ .Prompt }}<|im_end|>
+{{ end }}<|im_start|>assistant
+"""
+# default 2048
+PARAMETER num_ctx 4096
+# default 64
+PARAMETER repeat_last_n 256
+# default 1.1
+PARAMETER repeat_penalty 1.0
+# default
+PARAMETER repeat_penalty 1.1
+# default 0.8
+PARAMETER temperature 0.3
+PARAMETER stop "<|im_end|>"
+# default
+PARAMETER num_predict 128
+# default
+PARAMETER top_k 40
+# default
+PARAMETER top_p 0.9

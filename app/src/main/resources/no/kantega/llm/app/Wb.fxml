@@ -17,9 +17,9 @@
     <VBox>
         <MenuBar fx:id="menuBar">
             <menus>
-                <Menu fx:id="viewMenu" mnemonicParsing="true" text="View"/>
+                <Menu text="View"/>
             </menus>
         </MenuBar>
-        <StackPane fx:id="viewModelContainer"/>
+        <StackPane fx:id="viewModelContainer" VBox.vgrow="ALWAYS"/>
     </VBox>
 </Scene>

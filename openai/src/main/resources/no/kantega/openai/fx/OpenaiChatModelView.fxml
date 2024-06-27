@@ -6,8 +6,8 @@
 <?import org.controlsfx.control.PropertySheet?>
 
 <VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.openai.fx.OpenaiChatModelViewController">
-    <PropertySheet fx:id="openaiChatModelPropertySheet"/>
+    <PropertySheet fx:id="openaiChatModelPropertySheet" searchBoxVisible="false" modeSwitcherVisible="false"/>
     <HBox>
-        <Button fx:id="streamingChatModelAction" text="Create Streaming chat model" onAction="#createStreamingChatModel"/>
+        <Button fx:id="streamingChatModelAction" text="Create custom streaming chat model" onAction="#createStreamingChatModel"/>
     </HBox>
 </VBox>

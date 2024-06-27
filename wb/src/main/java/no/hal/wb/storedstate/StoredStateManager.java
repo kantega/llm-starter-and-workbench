@@ -89,7 +89,7 @@ public class StoredStateManager {
             .collect(Collectors.toMap(Map.Entry::getKey, entry -> storedStateOf(entry.getValue())));
     }
 
-    private Map<String, JsonNode> getStoredStateForType(String type) {
+    public Map<String, JsonNode> getStoredStateForType(String type) {
         Map<String, JsonNode> storedState = getDefaultStoredState(type);
         var files = getStoredStateFolderPath().toFile().listFiles();
         if (files != null) {
@@ -128,7 +128,7 @@ public class StoredStateManager {
     }
 
     public void storeStateForId(String id, String type, JsonNode storedState) {
-        Path storedStatePath = getStoredStateFolderPath().resolve(id + ".json");
+        Path storedStatePath = getStoredStateFolderPath().resolve(pathForId(id));
         try {
             Files.createDirectories(storedStatePath.getParent());
         } catch (IOException e) {
@@ -139,7 +139,7 @@ public class StoredStateManager {
         json.put("id", id);
         json.set("storedstate", storedState);
         try {
-            objectMapper.writeValue(storedStatePath.toFile(), json);
+            objectMapper.writerWithDefaultPrettyPrinter().writeValue(storedStatePath.toFile(), json);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -158,13 +158,15 @@ public class StoredStateManager {
         }
     }
 
-    public void onEvent(@Observes ViewEvent.Added event) {
-        var viewInfo = event.viewInfo();
-        if (viewInfo.instance().controller() instanceof Configurable configurable) {
-            var json = getStoredStateForId(viewInfo.viewId());
-            configurable.configure(json);
-        }
-    }
+    // public void onEvent(@Observes ViewEvent.Added event) {
+    //     var viewInfo = event.viewInfo();
+    //     if (viewInfo.instance().controller() instanceof Configurable configurable) {
+    //         var json = getStoredStateForId(viewInfo.viewId());
+    //         if (json != null) {
+    //             // // configurable.configure(json, objectMapper);
+    //         }
+    //     }
+    // }
     
     public void onEvent(@Observes ViewEvent.Removed event) {
         var viewInfo = event.viewInfo();

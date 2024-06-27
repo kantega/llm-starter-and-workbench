@@ -16,6 +16,6 @@ public class ViewProviders {
 
     @Produces
     ViewProvider huggingfaceChatModelView() {
-        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.HuggingfaceModelView", "Huggingface model"), fxmlLoaderProvider, "/no/kantega/huggingface/fx/HuggingfaceChatModelView.fxml");
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.HuggingfaceModelView", "Huggingface model", "Chat models"), fxmlLoaderProvider, "/no/kantega/huggingface/fx/HuggingfaceChatModelView.fxml"){};
     }
 }

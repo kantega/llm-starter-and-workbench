@@ -11,11 +11,11 @@ import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.layout.GridPane;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingTarget;
+import no.hal.fx.bindings.BindingsTarget;
 
 @Dependent
-public class ChatMemoryViewController implements BindableView {
+public class ChatMemoryViewController implements BindingsTarget {
 
     @FXML
     GridPane chatMessagesPane;
@@ -34,10 +34,6 @@ public class ChatMemoryViewController implements BindableView {
     }
 
     private Property<ChatMemoryUpdate> chatMemoryProperty = new SimpleObjectProperty<ChatMemoryUpdate>();
-    
-    public Property<ChatMemoryUpdate> chatMemoryProperty() {
-        return this.chatMemoryProperty;
-    }
 
     private ChatMessagesGridPaneController chatMemoryGridPaneController;
     

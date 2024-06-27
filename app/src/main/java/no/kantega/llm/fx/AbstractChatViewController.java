@@ -88,7 +88,7 @@ public abstract class AbstractChatViewController {
                         Platform.runLater(() -> handleCompleteAiMessage(answer.content()));
                     })
                     .onError(ex -> {
-                        logger.error(ex);
+                        logger.error("Exception when streaming answer from chatbot agent", ex);
                         callback.call(false);
                     })
                     .start();

@@ -14,6 +14,7 @@ import dev.langchain4j.service.AiServices;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
+import javafx.beans.binding.Bindings;
 import javafx.beans.property.Property;
 import javafx.beans.property.SimpleObjectProperty;
 import javafx.event.ActionEvent;
@@ -22,14 +23,15 @@ import javafx.scene.control.Button;
 import javafx.scene.control.TextInputControl;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
 import no.hal.fx.bindings.BindingTarget;
+import no.hal.fx.bindings.BindingsSource;
+import no.hal.fx.bindings.BindingsTarget;
 import no.kantega.llm.fx.ChatMemoryViewController.ChatMemoryUpdate;
 import no.kantega.llm.fx.IngestorViewController.TextSegmentEmbeddings;
 
 @Dependent
-public class RagChatViewController extends AbstractChatViewController implements BindableView {
+public class RagChatViewController extends AbstractChatViewController implements BindingsSource, BindingsTarget {
 
     private ChatMemory chatMemory;
 
@@ -108,6 +110,8 @@ public class RagChatViewController extends AbstractChatViewController implements
         }
     }
 
+    private String sendUserMessageActionTextFormat;
+
     @FXML
     void initialize() {
         systemPromptText.setText(systemPrompt);
@@ -123,10 +127,15 @@ public class RagChatViewController extends AbstractChatViewController implements
 
         systemPromptText.textProperty().subscribe(text -> handleRestartChat());
 
-        String sendUserMessageActionTextFormat = sendUserMessageAction.getText();
+        sendUserMessageActionTextFormat = sendUserMessageAction.getText();
         LabelAdapter<StreamingChatLanguageModel> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
-        var computedLabelValue = chatModelProperty.map(cm -> sendUserMessageActionTextFormat.formatted(labelAdapter.getText(cm)));
-        sendUserMessageAction.textProperty().bind(computedLabelValue.orElse(sendUserMessageActionTextFormat.formatted("?")));
+        sendUserMessageAction.textProperty().bind(Bindings.createStringBinding(() -> {
+            var cm = chatModelProperty.getValue();
+            String cmLabel = (cm != null ? labelAdapter.getText(cm) : "?");
+            var tse = textSegmentEmbeddingsProperty.getValue();
+            String tseLabel = (tse != null ? String.valueOf(tse.textSegmentEmbeddings().size()) : "0");
+            return sendUserMessageActionTextFormat.formatted(cmLabel, tseLabel);
+        }, chatModelProperty, textSegmentEmbeddingsProperty));
 
         bindingTargets = List.of(
             new BindingTarget<StreamingChatLanguageModel>(sendUserMessageAction, StreamingChatLanguageModel.class, chatModelProperty),
@@ -153,7 +162,10 @@ public class RagChatViewController extends AbstractChatViewController implements
         userMessageText.setText("");
         aiMessageText.setText("");
         chatMemory.clear();
-        chatMemory.add(new SystemMessage(systemPromptText.getText()));
+        String systemPrompt = systemPromptText.getText();
+        if (systemPrompt != null && (! systemPrompt.isBlank())) {
+            chatMemory.add(new SystemMessage(systemPrompt));
+        }
         chatMemoryUpdated(null);
     }
 }

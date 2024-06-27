@@ -3,7 +3,6 @@ package no.kantega.llm.fx;
 import java.util.List;
 import java.util.function.Predicate;
 
-import dev.langchain4j.model.embedding.EmbeddingModel;
 import jakarta.enterprise.inject.Instance;
 import jakarta.inject.Inject;
 import javafx.application.Platform;
@@ -14,13 +13,13 @@ import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.ChildrenAdapter;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
-import no.hal.fx.bindings.BindableView;
 import no.hal.fx.bindings.BindingSource;
+import no.hal.fx.bindings.BindingsSource;
 import no.hal.fx.bindings.FxBindings;
 import no.kantega.llm.ModelConfiguration;
 import no.kantega.llm.ModelManager;
 
-public abstract class ModelsViewController<T> implements BindableView {
+public abstract class ModelsViewController<T> implements BindingsSource {
 
     private Class<T> modelClass;
 
