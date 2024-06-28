@@ -1,12 +1,9 @@
 [
     {
-        "type": "view",
-        "id": "no.kantega.llm.fx.EmbeddingModelsView#0",
-        "storedstate": null
-    },
-    {
-        "type": "view",
-        "id": "no.kantega.llm.fx.StreamingChatLanguageModelsView#0",
-        "storedstate": null
+        "type" : "view",
+        "id" : "no.kantega.llm.fx.WelcomeView#0",
+        "storedstate" : {
+          "markdownResource" : "no.kantega.llm.fx.WelcomeView:/views/no.kantega.llm.fx.WelcomeView.md"
+        }
     }
 ]
