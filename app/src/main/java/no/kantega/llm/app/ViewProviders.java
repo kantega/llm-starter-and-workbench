@@ -1,7 +1,6 @@
 package no.kantega.llm.app;
 
 import java.io.IOException;
-import java.util.Map;
 
 import jakarta.enterprise.context.ApplicationScoped;
 import jakarta.enterprise.inject.Produces;
@@ -9,7 +8,10 @@ import jakarta.inject.Inject;
 import jakarta.inject.Provider;
 import javafx.fxml.FXMLLoader;
 import no.hal.wb.fx.FxmlViewProvider;
+import no.hal.wb.views.ViewManager;
 import no.hal.wb.views.ViewProvider;
+import no.hal.wb.views.markdown.MarkdownViewController;
+import no.hal.wb.views.markdown.MarkdownViewProvider;
 
 @ApplicationScoped
 public class ViewProviders {
@@ -85,5 +87,13 @@ public class ViewProviders {
     @Produces
     ViewProvider stackedChartView() throws IOException {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.StackedBarChartView", "Stacked bar chart", "Charts"), fxmlLoaderProvider, "/no/kantega/llm/fx/StackedBarChartView.fxml"){};
+    }
+
+    @Inject
+    jakarta.enterprise.inject.Instance<MarkdownViewController> markdownViewController;
+
+    @Produces
+    ViewProvider welcomeView() throws IOException {
+        return new MarkdownViewProvider(markdownViewController, new ViewProvider.Info("no.kantega.llm.fx.WelcomeView", "Welcome", "Help"), ViewManager.VIEW_INFO_PATH_FORMAT) {};
     }
 }

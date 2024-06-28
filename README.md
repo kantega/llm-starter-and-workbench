@@ -16,7 +16,7 @@ Build it with `mvn install` and run with `mvn quarkus:dev -f app` (but note the 
     - If you're using VSCode, consider installing the [JBang extensions](https://github.com/jbangdev/jbang-vscode).
 - Get access to LLM services, at least one of the following:
     - Install [ollama](https://ollama.com/), so you can run LLM services locally.
-    - Register with an LLM service provider, like [openai](https://platform.openai.com/) or [huggingface](https://huggingface.co/).
+    - Register with an LLM service provider, like [huggingface](https://huggingface.co/) or [openai](https://platform.openai.com/).
 - Edit the [application.properties](app/src/main/resources/application.properties) file as you see fit and define environment necessary variables or create a `.env` file in the `app` for secrets/keys. See [quarkus' configuration documentation](https://quarkus.io/guides/config#secrets-in-environment-properties) for details.
 
 ## JBang scripts
@@ -50,41 +50,3 @@ Most views have an info page, right-click on the tab and select the **Info** men
 
 The workbench is a [JavaFX](https://openjfx.io/) application built on [Quarkus](https://quarkus.io/).
 Built it with `mvn install` and run with `mvn quarkus:dev -f app`.
-
-### Views
-
-The **View** menu has entries for each kind of view, organized by category. Select an entry to create a new view.
-
-* [Embedding models view](app/src/main/resources/markdown/no.kantega.llm.fx.EmbeddingModelsView.md) - lists all available embedding models
-
-* [Chat models view](app/src/main/resources/markdown/no.kantega.llm.fx.ChatLanguageModelView.md) - lists all available chat models
-
-* [Streaming chat models view](app/src/main/resources/markdown/no.kantega.llm.fx.StreamingChatLanguageModelView.md) - lists all available streaming chat models
-
-* [Ollama models view](ollama/src/main/resources/markdown/no.kantega.llm.fx.OllamaModelsView.md) - create new ollama chat models
-
-* [OpenAi models view](openai/src/main/resources/markdown/no.kantega.llm.fx.OpenaiChatModelsView.md) - create new open ai chat models
-
-* [Hugging face models view](huggingface/src/main/resources/markdown/no.kantega.llm.fx.HuggingfaceModelView.md) - create new hugging face chat models
-
-* [Simple chat view](app/src/main/resources/markdown/no.kantega.llm.fx.SimpleChatView.md) - chat with a (streaming) chat model
-
-* [Chat memory view](app/src/main/resources/markdown/no.kantega.llm.fx.ChatMemoryView.md) - shows the messages in a chat memory
-
-* [Embeddings score view](app/src/main/resources/markdown/no.kantega.llm.fx.EmbeddingsScoreView.md) - compute and compare (the similarity of) embeddings
-
-* [Uri documents view](app/src/main/resources/markdown/no.kantega.llm.fx.UriDocumentsView.md) - load documents, to use as input for the **Ingestor** view
-
-* [Ingestor view](app/src/main/resources/markdown/no.kantega.llm.fx.IngestorView.md) - split documents into text segments and compute their embeddings
-
-* [Embeddings search view](app/src/main/resources/markdown/no.kantega.llm.fx.EmbeddingsSearchView.md) - search embeddings for text fragments similar to a sentence
-
-* [Rag chat view](app/src/main/resources/markdown/no.kantega.llm.fx.RagChatView.md) - chat with a chat model, using RAG to provide answers
-
-* [Csv view](app/src/main/resources/markdown/no.kantega.llm.fx.CsvView.md) - load and view csv data
-
-* [Bar chart view](app/src/main/resources/markdown/no.kantega.llm.fx.BarChartView.md) - view table data as bar chart
-
-* [Stacked bar chart view](app/src/main/resources/markdown/no.kantega.llm.fx.StackedBarChartView.md) - view table data as stacked bar chart
-
-* [Expression view](app/src/main/resources/markdown/no.kantega.llm.fx.ExpressionView.md) - evaluate expressions

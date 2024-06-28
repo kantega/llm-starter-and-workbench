@@ -11,7 +11,6 @@ import java.util.stream.Collectors;
 
 import org.jboss.logging.Logger;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.panemu.tiwulfx.control.dock.DetachableTab;
@@ -35,6 +34,7 @@ import no.hal.wb.views.ViewModel.Item;
 import no.hal.wb.views.markdown.MarkdownViewController;
 import no.hal.wb.views.markdown.MarkdownViewProvider;
 import no.hal.wb.views.markdown.PathResolver;
+import no.hal.wb.views.markdown.PathResolving;
 
 /*
  * Based on https://github.com/panemu/tiwulfx-dock
@@ -148,6 +148,10 @@ public class ViewManager implements Configurable, PathResolver {
 
     private ViewInfo addView(ViewProvider viewProvider, String instanceId, String viewTitle, JsonNode configuration) {
         ViewProvider.Instance instance = viewProvider.createView(configuration);
+        // TODO: should this rather be handled with injection?
+        if (instance.controller() instanceof PathResolving pathResolving) {
+            pathResolving.setPathResolver(this);
+        }
         var tab = new DetachableTab(viewTitle, instance.viewNode());
         var viewInfo = new ViewInfo(viewProvider.getViewInfo(), instanceId, instance, tab);
         tab.setOnClosed(event -> removeView(viewInfo));
@@ -229,7 +233,7 @@ public class ViewManager implements Configurable, PathResolver {
         }
     }
 
-    private final static String VIEW_INFO_PATH_FORMAT = "%1$s:/views/%1$s.md"; // takes only one argument, the view provider id
+    public final static String VIEW_INFO_PATH_FORMAT = "%1$s:/views/%1$s.md"; // takes only one argument, the view provider id
 
     private Optional<MenuItem> createInfoMenuItem(ViewProvider viewProvider, ViewInfo viewInfo) {
         var viewProviderId = providerId(viewProvider.viewProviderId());
@@ -237,34 +241,15 @@ public class ViewManager implements Configurable, PathResolver {
         if (resolvePath(URI.create(markdownResource)) == null) {
             return Optional.empty();
         }
-        var configuration = MarkdownViewController.configuration(null, markdownResource.toString());
+        var configuration = MarkdownViewController.configuration(markdownResource.toString());
         var menuItem = new MenuItem("Info");
-        menuItem.setOnAction(event -> {
-            var markdownViewInfo = createView(MarkdownViewProvider.VIEW_ID, configuration);
-            if (markdownViewInfo.instance().controller() instanceof MarkdownViewController markdownViewController) {
-                markdownViewController.setPathResolver(this);
-                // markdownViewController.setHostServices(hostServices);
-            }
-        });
+        menuItem.setOnAction(event -> createView(MarkdownViewProvider.VIEW_ID, configuration));
         return Optional.of(menuItem);
     }
 
     public ViewInfo createView(String viewId, JsonNode configuration) {
         return addView(viewId, configuration);
     }
-
-    // public ViewInfo createView(Object source) {
-    //     String id = switch (source) {
-    //         case Styleable stylable -> stylable.getId();
-    //         default -> String.valueOf(source);
-    //     };
-    //     int pos = id.indexOf("__");
-    //     if (pos >= 0) {
-    //         id = id.substring(0, pos + 2);
-    //     }
-    //     id = id.replace("_", ".");
-    //     return createView(id, null);
-    // }
 
     public List<ViewInfo> createInitialViews() {
         return stateStorageManager.getStoredStateForType("view").entrySet().stream()

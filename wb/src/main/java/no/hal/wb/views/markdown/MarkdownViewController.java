@@ -8,6 +8,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import org.jboss.logging.Logger;
 
@@ -18,28 +19,39 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
-import javafx.application.HostServices;
 import javafx.scene.Node;
 import javafx.scene.control.ContextMenu;
 import javafx.scene.control.MenuItem;
+import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
+import javafx.scene.input.Clipboard;
+import javafx.scene.input.ClipboardContent;
 import javafx.scene.input.MouseButton;
+import javafx.scene.input.MouseEvent;
+import javafx.scene.layout.HBox;
+import javafx.scene.layout.Priority;
+import javafx.scene.layout.StackPane;
+import javafx.scene.layout.VBox;
+import javafx.scene.web.WebView;
 import no.hal.wb.storedstate.Configurable;
 import one.jpro.platform.mdfx.MarkdownView;
 import one.jpro.platform.mdfx.extensions.ImageExtension;
 import one.jpro.platform.mdfx.impl.AdaptiveImage;
 
 @Dependent
-public class MarkdownViewController implements Configurable {
+public class MarkdownViewController implements PathResolving, Configurable {
     
     private String markdownString;
     private URI markdownResource;
+
+    private StackPane content;
     private MarkdownView markdownView;
+    private WebView webView;
+    private ContextMenu contextMenu;
     
     private MenuItem forwardButton, backwardButton;
     
     private PathResolver pathResolver;
-    private HostServices hostServices;
 
     @Inject Logger logger;
 
@@ -62,54 +74,86 @@ public class MarkdownViewController implements Configurable {
         forwardButton.setOnAction(actionEvent -> navigateForward());
         backwardButton = new MenuItem("Backward");
         backwardButton.setOnAction(actionEvent -> navigateBackward());
-        var contextMenu = new ContextMenu(forwardButton, backwardButton);
+        contextMenu = new ContextMenu(forwardButton, backwardButton);
         
         markdownView.setOnMouseClicked(mouseEvent -> {
-            if (mouseEvent.getButton() == MouseButton.SECONDARY) {
-                contextMenu.show(markdownView, mouseEvent.getScreenX(), mouseEvent.getScreenY());
-            } else {
+            if (! contextMenuOpener.apply(mouseEvent)) {
                 var node = mouseEvent.getPickResult().getIntersectedNode();
                 if (node.getStyleClass().contains("markdown-link") && node.getProperties().get("markdown-link") instanceof URI link) {
                     navigateTo(link);
                 }
             }
         });
+        ScrollPane scrollPane = new ScrollPane(markdownView);
+        scrollPane.setFitToWidth(true);
+        HBox.setHgrow(scrollPane, Priority.ALWAYS);
+        content = new StackPane(markdownView);
     }
 
-    public Node getMarkdownView() {
-        return markdownView;
+    private Function<MouseEvent, Boolean> contextMenuOpener = mouseEvent -> {
+        if (mouseEvent.getButton() == MouseButton.SECONDARY) {
+            mouseEvent.consume();
+            contextMenu.show(markdownView, mouseEvent.getScreenX(), mouseEvent.getScreenY());
+            return true;
+        }
+        return false;
+    };
+
+    public Node getContent() {
+        return content;
     }
 
+    @Override
     public void setPathResolver(PathResolver pathResolver) {
         this.pathResolver = pathResolver;
-        updateMarkdownView();
+        updateView();
     }
 
     private URI resolveLink(String link) {
         return pathResolver.resolvePath(markdownResource).resolve(link);
     }
 
-    public void setHostServices(HostServices hostServices) {
-        this.hostServices = hostServices;
-    }
-
-    private void updateMarkdownView() {
-        if (markdownString == null) {
-            if (pathResolver == null) {
-                return;
+    private void updateView() {
+        if (markdownResource.getScheme().startsWith("http")) {
+            if (webView == null) {
+                webView = new WebView();
+                VBox.setVgrow(webView, Priority.ALWAYS);
+                webView.setContextMenuEnabled(false);
+                webView.setOnMouseClicked(mouseEvent -> contextMenuOpener.apply(mouseEvent));
+                // webView.getEngine().locationProperty().subscribe(location -> {
+                //     if (history != null && location != null && (! location.equals(history.getLast().markdownResource.toString()))) {
+                //         pushHistory(URI.create(location));
+                //     }
+                // });
+                content.getChildren().add(webView);
             }
-            var actualResource = pathResolver.resolvePath(markdownResource);
-            logger.infof("Reading markup for %s from %s", markdownResource, actualResource);
-            StringBuilder markdown = new StringBuilder();
-            try (InputStream input = actualResource.toURL().openStream();
-                BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-                reader.lines().forEach(line -> markdown.append(line).append("\n"));        
-            } catch (Exception e) {
-                appendException(e, markdownResource, markdown);
+            markdownView.setVisible(false);
+            webView.setVisible(true);
+            logger.infof("Opening %s in web view", markdownResource);
+            webView.getEngine().load(markdownResource.toString());
+            return;
+        } else {
+            markdownView.setVisible(true);
+            if (webView != null) {
+                webView.setVisible(false);
             }
-            markdownString = markdown.toString();
+            if (markdownString == null) {
+                if (pathResolver == null) {
+                    return;
+                }
+                var actualResource = pathResolver.resolvePath(markdownResource);
+                logger.infof("Reading markup for %s from %s", markdownResource, actualResource);
+                StringBuilder markdown = new StringBuilder();
+                try (InputStream input = actualResource.toURL().openStream();
+                    BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                    reader.lines().forEach(line -> markdown.append(line).append("\n"));        
+                } catch (Exception e) {
+                    appendException(e, markdownResource, markdown);
+                }
+                markdownString = markdown.toString();
+            }
+            markdownView.setMdString(markdownString);
         }
-        markdownView.setMdString(markdownString);
     }
 
     private void appendException(Exception e, URI source, StringBuilder markdownBuffer) {
@@ -146,7 +190,7 @@ public class MarkdownViewController implements Configurable {
         var entry = history.get(historyPosition);
         markdownString = entry.markdownString;
         markdownResource = entry.markdownResource;
-        updateMarkdownView();
+        updateView();
         backwardButton.setDisable(historyPosition == 0);
         forwardButton.setDisable(historyPosition >= history.size() - 1);
     }
@@ -154,11 +198,16 @@ public class MarkdownViewController implements Configurable {
     private void navigateTo(URI link) {
         logger.infof("Navigating to %s", link);
         if (link.getScheme().startsWith("http")) {
-            if (hostServices != null) {
-                hostServices.showDocument(link.toString());
-            }
-            return;
+            ClipboardContent content = new ClipboardContent();
+            content.putString(link.toString());
+            content.putUrl(link.toString());
+            Clipboard.getSystemClipboard().setContent(content);
         }
+        pushHistory(link);
+        navigate(1);
+    }
+
+    private void pushHistory(URI link) {
         if (history == null) {
             history = new ArrayList<>();
             history.add(new HistoryEntry(markdownString, markdownResource));
@@ -168,7 +217,6 @@ public class MarkdownViewController implements Configurable {
             }
         }
         history.add(new HistoryEntry(null, link));
-        navigate(1);
     }
 
     public void navigateForward() {
@@ -181,7 +229,7 @@ public class MarkdownViewController implements Configurable {
 
     // configuration
 
-    public final static JsonNode configuration(String markdownString, String markdownResource) {
+    public final static JsonNode configuration(String markdownResource) {
         var configuration = JsonNodeFactory.instance.objectNode();
         configuration.put("markdownResource", markdownResource);
         return configuration;
@@ -189,7 +237,7 @@ public class MarkdownViewController implements Configurable {
 
     @Override
     public JsonNode getConfiguration() {
-        return configuration(markdownString, markdownResource.toString());
+        return configuration(markdownResource.toString());
     }
 
     @Override
@@ -199,6 +247,6 @@ public class MarkdownViewController implements Configurable {
             case ValueNode valueNode -> URI.create(valueNode.asText());
             default -> null;
         };
-        updateMarkdownView();
+        updateView();
     }
 }

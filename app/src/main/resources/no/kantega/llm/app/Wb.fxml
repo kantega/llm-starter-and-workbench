@@ -18,6 +18,7 @@
         <MenuBar fx:id="menuBar">
             <menus>
                 <Menu text="View"/>
+                <Menu text="Help"/>
             </menus>
         </MenuBar>
         <StackPane fx:id="viewModelContainer" VBox.vgrow="ALWAYS"/>
