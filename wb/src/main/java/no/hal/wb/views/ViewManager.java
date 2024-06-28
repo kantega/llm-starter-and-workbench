@@ -119,10 +119,6 @@ public class ViewManager implements Configurable, PathResolver {
     Logger logger;
 
     ViewInfo addViewUsingPlaceholder(String id, JsonNode configuration) {
-        try {
-            System.out.println("addViewUsingPlaceholder(...):" + objectMapper.writeValueAsString(configuration));
-        } catch (JsonProcessingException e) {
-        }
         ViewProvider viewProvider = findViewProvider(id).orElseThrow(() -> new IllegalArgumentException("No view provider for " + id));
         if (isInstanceId(id) && viewModel.containsView(id)) {
             throw new IllegalArgumentException("instanceId " + id + " already in use");
@@ -233,8 +229,11 @@ public class ViewManager implements Configurable, PathResolver {
         }
     }
 
+    private final static String VIEW_INFO_PATH_FORMAT = "%1$s:/views/%1$s.md"; // takes only one argument, the view provider id
+
     private Optional<MenuItem> createInfoMenuItem(ViewProvider viewProvider, ViewInfo viewInfo) {
-        var markdownResource = viewProvider.viewProviderId() + ":" + "/" + viewProvider.viewProviderId() + ".md";
+        var viewProviderId = providerId(viewProvider.viewProviderId());
+        var markdownResource = VIEW_INFO_PATH_FORMAT.formatted(viewProviderId);
         if (resolvePath(URI.create(markdownResource)) == null) {
             return Optional.empty();
         }
