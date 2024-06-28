@@ -87,7 +87,7 @@ public class MarkdownViewController implements PathResolving, Configurable {
         ScrollPane scrollPane = new ScrollPane(markdownView);
         scrollPane.setFitToWidth(true);
         HBox.setHgrow(scrollPane, Priority.ALWAYS);
-        content = new StackPane(markdownView);
+        content = new StackPane(scrollPane);
     }
 
     private Function<MouseEvent, Boolean> contextMenuOpener = mouseEvent -> {
