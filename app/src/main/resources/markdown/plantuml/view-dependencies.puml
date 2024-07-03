@@ -1,0 +1,50 @@
+@startuml view-dependencies
+
+component OllamaModelsView
+component OpenAiModelsView
+
+component ChatModelsView
+component StreamingChatModelsView
+
+component SimpleChatView
+component RagChatView
+
+component ChatMemoryView
+
+component CsvView
+component BarChartView
+component StackedBarChartView
+
+OllamaModelsView <.. StreamingChatModelsView : StreamingChatLanguageModel
+OpenAiModelsView <.. StreamingChatModelsView : StreamingChatLanguageModel
+
+ChatModelsView <.. SimpleChatView : ChatLanguageModel
+StreamingChatModelsView <.. SimpleChatView : StreamingChatLanguageModel
+
+ChatModelsView <.. RagChatView : ChatLanguageModel
+StreamingChatModelsView <.. RagChatView : StreamingChatLanguageModel
+
+SimpleChatView <.. ChatMemoryView : ChatMemory
+RagChatView <.. ChatMemoryView : ChatMemory
+
+component EmbeddingModelsView
+component EmbeddingsScoreView
+component EmbeddingsSearchView
+
+OllamaModelsView <.. EmbeddingModelsView : EmbeddingModel
+EmbeddingModelsView <.. EmbeddingsScoreView : EmbeddingModel
+
+EmbeddingModelsView <.. RagChatView : EmbeddingModel
+
+component UriDocumentsView
+component IngestorView
+
+EmbeddingModelsView <.. IngestorView : EmbeddingModel
+UriDocumentsView <.. IngestorView : Documents
+
+IngestorView <.. EmbeddingsSearchView : TextSegmentEmbeddings
+
+CsvView <.. BarChartView : Table
+CsvView <.. StackedBarChartView : Table
+
+@enduml

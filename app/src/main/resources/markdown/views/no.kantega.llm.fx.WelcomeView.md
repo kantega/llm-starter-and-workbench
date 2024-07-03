@@ -3,11 +3,11 @@
 Welcome to the Large Language Model (LLM) workbench! The workbench allows playing around interactively, with all parts of a RAG-based chatbot.
 
 If you've come this far, you likely have access to LLMs in one of several ways:
-- run locally, e.g. with Ollama [ollama](https://ollama.com/)
+- run locally, e.g. with [Ollama](https://ollama.com/)
 - accessed through a service provider, e.g. [huggingface](https://huggingface.co/) or [openai](https://platform.openai.com/)
 
 This will allow you to instantiate one or more LLMs in the workbench, and
-start using it in [a simple chat](#simple-chat)!
+start using it in [a simple chat](../tutorials/simple-chat.md)!
 
 But first, some words about the workbench.
 

@@ -9,12 +9,12 @@ import javafx.collections.FXCollections;
 import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.geometry.VPos;
+import javafx.scene.Node;
 import javafx.scene.Parent;
 import javafx.scene.control.Label;
 import javafx.scene.control.Labeled;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.text.Text;
 import no.hal.fx.util.CopyToClipboardActionCreator;
 
 @Dependent
@@ -60,19 +60,38 @@ public class ChatMessagesGridPaneController {
         for (var message : chatMessages) {
             switch (message.type()) {
                 case ChatMessageType.AI, ChatMessageType.USER, ChatMessageType.SYSTEM -> {
-                    var messageText = new Label(message.text());
-                    CopyToClipboardActionCreator.setContextMenu(messageText, Labeled::getText);
-                    messageText.setWrapText(true);
-                    chatMessagesGridPane.add(messageText, 1, row);
-                    var agentText = new Text(message.type().name());
-                    GridPane.setValignment(agentText, VPos.TOP);
-                    chatMessagesGridPane.add(agentText, message.type() != ChatMessageType.AI ? 0 : 2, row);
+                    chatMessagesGridPane.add(createMessageText(message), 1, row);
+                    chatMessagesGridPane.add(createAgentText(message.type()), message.type() != ChatMessageType.AI ? 0 : 2, row);
                     row++;
                 }
                 default -> {}
             }
         }
         scrollToBottom();
+    }
+
+    private void setMessageTextStyle(Node node, ChatMessageType messageType, String genericStyle) {
+        var messageStyle = messageType.name().toLowerCase() + "-chat-message";
+        node.getStyleClass().addAll(genericStyle, messageStyle);
+    }
+    
+    private Labeled createMessageText(ChatMessageType messageType, String messageText) {
+        var messageTextNode = new Label(messageText);
+        setMessageTextStyle(messageTextNode, messageType, "chat-message");
+        CopyToClipboardActionCreator.setContextMenu(messageTextNode, Labeled::getText);
+        messageTextNode.setWrapText(true);
+        return messageTextNode;
+    }
+
+    private Labeled createMessageText(ChatMessage message) {
+        return createMessageText(message.type(), message.text());
+    }
+
+    private Labeled createAgentText(ChatMessageType messageType) {
+        var agentText = new Label(messageType.name());
+        setMessageTextStyle(agentText, messageType, "chat-message-role");
+        GridPane.setValignment(agentText, VPos.TOP);
+        return agentText;
     }
 
     private void scrollToBottom() {
@@ -94,13 +113,10 @@ public class ChatMessagesGridPaneController {
         if (nextToken == null) {
             streamTarget = null;
         } else if (streamTarget == null) {
-            streamTarget = new Label(nextToken);
-            streamTarget.setWrapText(true);
+            streamTarget = createMessageText(ChatMessageType.AI, nextToken);
             int nextRow = chatMessagesGridPane.getChildrenUnmodifiable().size() / 2;
             chatMessagesGridPane.add(streamTarget, 1, nextRow);
-            var agentText = new Text(ChatMessageType.AI.name());
-            GridPane.setValignment(agentText, VPos.TOP);
-            chatMessagesGridPane.add(agentText, 2, nextRow);
+            chatMessagesGridPane.add(createAgentText(ChatMessageType.AI), 2, nextRow);
         } else {
             streamTarget.setText(streamTarget.getText() + nextToken);
         }

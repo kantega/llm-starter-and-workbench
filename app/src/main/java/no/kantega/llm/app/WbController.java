@@ -15,11 +15,19 @@ import javafx.scene.control.MenuBar;
 import javafx.scene.control.MenuItem;
 import javafx.scene.layout.Pane;
 import no.hal.wb.bindings.BindingsManager;
+import no.hal.wb.logging.AppLoggingHandler;
+import no.hal.wb.logging.LogRecordsController;
 import no.hal.wb.views.ViewManager;
 import no.hal.wb.views.ViewModel;
 
 @Dependent
 public class WbController {
+
+    @Inject
+    AppLoggingHandler appLoggingHandler;
+
+    @FXML
+    LogRecordsController appLoggingController;
 
     @FXML
     Pane viewModelContainer;
@@ -35,6 +43,8 @@ public class WbController {
     
     @FXML
     void initialize() {
+        appLoggingHandler.setLogRecordsController(appLoggingController);
+
         bindingsManager.setControllerRoot(viewModelContainer);
         viewManager.initialize(viewModelContainer,
             new ViewModel.ContainerItem<>(new ViewModel.ContainerType.SplitPaneContainer(Orientation.HORIZONTAL),

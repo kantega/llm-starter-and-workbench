@@ -39,3 +39,11 @@ Here are all the available views:
 * [Stacked bar chart view](no.kantega.llm.fx.StackedBarChartView.md) - view table data as stacked bar chart
 
 * [Expression view](no.kantega.llm.fx.ExpressionView.md) - evaluate expressions
+
+### Dependencies
+
+Views may *provide* data to other views, alternatively a view my *require* data from other views. E.g. the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView.md) allows the user to select an **EmbeddingModel** from a lists, and this **EmbeddingModel** is made available or *provided* to other views. The [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView.md) on the other hand, *requires* an **EmbeddingModel**, and by linking it to the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView.md), it will use the selected one. We can say there's a provide/require-*dependency* among these two views.
+
+The following diagram illustrates the provide/require-relationsships among the above views.
+
+![](../plantuml/view-dependencies.png)

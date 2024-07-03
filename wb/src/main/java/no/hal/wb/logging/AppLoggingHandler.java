@@ -40,7 +40,7 @@ public class AppLoggingHandler extends Handler {
     
     @Override
     public void flush() {
-    // ignore
+        // ignore
     }
     
     @Override

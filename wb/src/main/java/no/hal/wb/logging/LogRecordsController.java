@@ -66,9 +66,9 @@ public class LogRecordsController {
         }
         if (logRecordsControl != null) {
             switch (logRecordsControl) {
-                case Spinner<?> spinner -> logRecordsControllers.add(new LogRecordsSpinnerController((Spinner<LogRecord>) logRecordsControl));
-                case ListView<?> listView -> logRecordsControllers.add(new LogRecordsListViewController((ListView<LogRecord>) logRecordsControl));
-                case TreeView<?> treeView -> logRecordsControllers.add(new LogRecordsTreeViewController((TreeView<Object>) logRecordsControl));
+                case Spinner<?> spinner -> logRecordsControllers.add(new LogRecordsSpinnerController((Spinner<LogRecord>) spinner));
+                case ListView<?> listView -> logRecordsControllers.add(new LogRecordsListViewController((ListView<LogRecord>) listView));
+                case TreeView<?> treeView -> logRecordsControllers.add(new LogRecordsTreeViewController((TreeView<Object>) treeView));
                 case null, default -> {}
             }
         }

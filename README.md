@@ -50,3 +50,10 @@ Most views have an info page, right-click on the tab and select the **Info** men
 
 The workbench is a [JavaFX](https://openjfx.io/) application built on [Quarkus](https://quarkus.io/).
 Built it with `mvn install` and run with `mvn quarkus:dev -f app`.
+
+## Documentation
+
+Documentation is provided inside the application, using a markdown view.
+The markdown files are mainly in the `app` module, in the `src/main/resources/markdown` folder, but some are in other modules.
+
+Diagram are made with [plantuml](https://plantuml.com) and generated using `mvn plantuml:generate -f app`

@@ -20,8 +20,8 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
 import javafx.scene.Node;
+import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
-import javafx.scene.control.MenuItem;
 import javafx.scene.control.ScrollPane;
 import javafx.scene.image.Image;
 import javafx.scene.input.Clipboard;
@@ -49,7 +49,7 @@ public class MarkdownViewController implements PathResolving, Configurable {
     private WebView webView;
     private ContextMenu contextMenu;
     
-    private MenuItem forwardButton, backwardButton;
+    private Button forwardButton, backwardButton;
     
     private PathResolver pathResolver;
 
@@ -70,12 +70,6 @@ public class MarkdownViewController implements PathResolving, Configurable {
             }
         };
         
-        forwardButton = new MenuItem("Forward");
-        forwardButton.setOnAction(actionEvent -> navigateForward());
-        backwardButton = new MenuItem("Backward");
-        backwardButton.setOnAction(actionEvent -> navigateBackward());
-        contextMenu = new ContextMenu(forwardButton, backwardButton);
-        
         markdownView.setOnMouseClicked(mouseEvent -> {
             if (! contextMenuOpener.apply(mouseEvent)) {
                 var node = mouseEvent.getPickResult().getIntersectedNode();
@@ -87,7 +81,23 @@ public class MarkdownViewController implements PathResolving, Configurable {
         ScrollPane scrollPane = new ScrollPane(markdownView);
         scrollPane.setFitToWidth(true);
         HBox.setHgrow(scrollPane, Priority.ALWAYS);
-        content = new StackPane(scrollPane);
+        
+        content = new StackPane(scrollPane, createNavigationButtons());
+    }
+    
+    private Node createNavigationButtons() {
+        backwardButton = new Button("<");
+        backwardButton.setOnAction(actionEvent -> navigateBackward());
+        backwardButton.setDisable(true);
+        
+        forwardButton = new Button(">");
+        forwardButton.setOnAction(actionEvent -> navigateForward());
+        forwardButton.setDisable(true);
+    
+        var buttonGroup = new HBox(backwardButton, forwardButton);
+        buttonGroup.setManaged(false);
+    
+        return buttonGroup;
     }
 
     private Function<MouseEvent, Boolean> contextMenuOpener = mouseEvent -> {
@@ -125,7 +135,7 @@ public class MarkdownViewController implements PathResolving, Configurable {
                 //         pushHistory(URI.create(location));
                 //     }
                 // });
-                content.getChildren().add(webView);
+                content.getChildren().add(1, webView);
             }
             markdownView.setVisible(false);
             webView.setVisible(true);

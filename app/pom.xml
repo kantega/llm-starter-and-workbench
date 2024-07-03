@@ -118,6 +118,39 @@
                 <groupId>io.smallrye</groupId>
                 <artifactId>jandex-maven-plugin</artifactId>
             </plugin>
+
+            <plugin>
+                <groupId>com.github.jeluard</groupId>
+                <artifactId>plantuml-maven-plugin</artifactId>
+                <version>1.2</version>
+                <configuration>
+                    <sourceFiles>
+                        <directory>${project.basedir}/src/main/resources/markdown/plantuml</directory>
+                        <includes>
+                            <include>**/*.puml</include>
+                        </includes>
+                    </sourceFiles>
+                    <outputInSourceDirectory>true</outputInSourceDirectory>
+                    <outputFormat>png</outputFormat>
+                </configuration>
+                <dependencies>
+                <dependency>
+                    <groupId>net.sourceforge.plantuml</groupId>
+                    <artifactId>plantuml</artifactId>
+                    <version>1.2024.5</version>
+                    </dependency>
+                </dependencies>
+                <!--
+                <executions>
+                    <execution>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+                -->
+            </plugin>
         </plugins>
     </build>
 </project>

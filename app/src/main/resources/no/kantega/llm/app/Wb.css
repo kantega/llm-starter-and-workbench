@@ -1,0 +1,11 @@
+.user-chat-message {
+    -fx-background-color: #f4f4f4;
+}
+
+.ai-chat-message {
+    -fx-background-color: #c4c4c4;
+}
+
+.system-chat-message {
+    -fx-background-color: #a4a4a4;
+}

@@ -1,5 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
+<?import java.net.URL?>
+
 <?import javafx.scene.control.ComboBox?>
 <?import javafx.scene.control.Menu?>
 <?import javafx.scene.control.MenuBar?>
@@ -9,18 +11,29 @@
 <?import javafx.scene.control.TabPane?>
 <?import javafx.scene.control.TreeView?>
 <?import javafx.scene.layout.StackPane?>
+<?import javafx.scene.layout.BorderPane?>
 <?import javafx.scene.layout.VBox?>
 <?import javafx.scene.Scene?>
 <?import com.panemu.tiwulfx.control.dock.DetachableTabPane?>
 
 <Scene xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.app.WbController">
-    <VBox>
-        <MenuBar fx:id="menuBar">
-            <menus>
-                <Menu text="View"/>
-                <Menu text="Help"/>
-            </menus>
-        </MenuBar>
-        <StackPane fx:id="viewModelContainer" VBox.vgrow="ALWAYS"/>
-    </VBox>
+    <stylesheets>
+        <URL value="@Wb.css"/>
+    </stylesheets>
+    <BorderPane>
+        <top>
+            <MenuBar fx:id="menuBar">
+                <menus>
+                    <Menu text="View"/>
+                    <Menu text="Help"/>
+                </menus>
+            </MenuBar>
+        </top>
+        <center>
+            <StackPane fx:id="viewModelContainer" VBox.vgrow="ALWAYS"/>
+        </center>
+        <bottom>
+            <fx:include fx:id="appLogging" source="AppLoggingControl.fxml"/>
+        </bottom>
+    </BorderPane>
 </Scene>
