@@ -3,9 +3,9 @@
 }
 
 .ai-chat-message {
-    -fx-background-color: #c4c4c4;
+    -fx-background-color: #d4d4d4;
 }
 
 .system-chat-message {
-    -fx-background-color: #a4a4a4;
+    -fx-background-color: #b4b4b4;
 }

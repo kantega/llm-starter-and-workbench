@@ -2,12 +2,15 @@ package no.kantega.llm.fx;
 
 import java.util.List;
 import java.util.Objects;
+import java.util.function.BiFunction;
 
 import dev.langchain4j.data.embedding.Embedding;
 import dev.langchain4j.data.segment.TextSegment;
 import dev.langchain4j.model.embedding.EmbeddingModel;
+import dev.langchain4j.store.embedding.CosineSimilarity;
 import dev.langchain4j.store.embedding.EmbeddingMatch;
 import dev.langchain4j.store.embedding.EmbeddingStore;
+import dev.langchain4j.store.embedding.RelevanceScore;
 import dev.langchain4j.store.embedding.inmemory.InMemoryEmbeddingStore;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
@@ -50,6 +53,9 @@ public class EmbeddingsScoreViewController implements BindingsTarget {
 
     private Property<EmbeddingModel> embeddingModelProperty = new SimpleObjectProperty<EmbeddingModel>();
 
+    private record SimilarityMatch(EmbeddingMatch<TextSegment> match, double cosineSimilarity, double distanceSimilarity) {
+    }
+
     @FXML
     ListView<EmbeddingMatch<TextSegment>> matchesListView;
 
@@ -71,19 +77,48 @@ public class EmbeddingsScoreViewController implements BindingsTarget {
         );
     }
 
+    private TextSegment getTextFragment1() {
+        return TextSegment.from(embeddingsText1.getText());
+    }
+
+    private List<String> getTextFragments() {
+        return List.of(embeddingsText2.getText().split("\n"));
+    }
+
     @FXML
     void handleEmbeddingsScore() {
         EmbeddingModel embeddingModel = embeddingModelProperty.getValue();
-        TextSegment ts1 = TextSegment.from(embeddingsText1.getText());
-        Embedding embedding1 = embeddingModel.embed(ts1).content();
+        Embedding embedding1 = embeddingModel.embed(getTextFragment1()).content();
         EmbeddingStore<TextSegment> embeddingStore = new InMemoryEmbeddingStore<>();
-        var lines = embeddingsText2.getText().split("\n");
+        var lines = getTextFragments();
         for (var line : lines) {
             TextSegment ts2 = TextSegment.from(line);
             Embedding embedding2 = embeddingModel.embed(ts2).content();
             embeddingStore.add(embedding2, ts2);
         }
-        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.findRelevant(embedding1, lines.length);
+        List<EmbeddingMatch<TextSegment>> matches = embeddingStore.findRelevant(embedding1, lines.size());
         matchesListView.getItems().setAll(matches);
+    }
+
+    private static final BiFunction<Embedding, Embedding, Double> COSINE_SIMILARITY = (emb1, emb2) -> RelevanceScore.fromCosineSimilarity(CosineSimilarity.between(emb1, emb2));
+
+    void handleMetricEmbeddingsScore(BiFunction<Embedding, Embedding, Double> metric) {
+        EmbeddingModel embeddingModel = embeddingModelProperty.getValue();
+        Embedding embedding1 = embeddingModel.embed(getTextFragment1()).content();
+        var matches = getTextFragments().stream()
+            .map(line -> TextSegment.from(line))
+            .map(ts -> {
+                var tse = embeddingModel.embed(ts).content();
+                var score = metric.apply(embedding1, tse);
+                EmbeddingMatch<TextSegment> match = new EmbeddingMatch<TextSegment>(score, "embeddingId", tse, ts);
+                return match;
+            })
+            .sorted((match1, match2) -> Double.compare(match2.score(), match1.score()))
+            .toList();
+        matchesListView.getItems().setAll(matches);
+    }
+
+    void handleCosineSimilarityScore() {
+        handleMetricEmbeddingsScore(COSINE_SIMILARITY);
     }
 }

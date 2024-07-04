@@ -67,11 +67,21 @@ public class BindingController {
         return getBindingSubscriptions(subscription -> (source == null || source == subscription.source()) && (target == null || target == subscription.target()));
     }
 
+    private boolean bindingSourceMatchesTarget(BindingSource<?> source, BindingTarget<?> target) {
+        return source.sourceClass().equals(target.targetClass());
+    }
+
     public Optional<BindingSource<?>> findSourceForTarget(BindingTarget<?> bindingTarget) {
         return bindingSources
             // reverse, so newly added sources are tried first
             .reversed().stream()
-            .filter(bindingSource -> bindingSource.sourceClass().equals(bindingTarget.targetClass())).findFirst();
+            .filter(bindingSource -> bindingSourceMatchesTarget(bindingSource, bindingTarget)).findFirst();
+    }
+    public Optional<BindingTarget<?>> findTargetForSource(BindingSource<?> bindingSource) {
+        return bindingTargets
+            // reverse, so newly added targets are tried first
+            .reversed().stream()
+            .filter(bindingTarget -> bindingSourceMatchesTarget(bindingSource, bindingTarget)).findFirst();
     }
 
     public boolean bindToTarget(BindingTarget<?> bindingTarget) {
@@ -79,9 +89,17 @@ public class BindingController {
         source.ifPresent(bindingSource -> bindSourceToTarget(bindingSource, bindingTarget, null));
         return source.isPresent();
     }
+    public boolean bindToSource(BindingSource<?> bindingSource) {
+        var target = findTargetForSource(bindingSource);
+        target.ifPresent(bindingTarget -> bindSourceToTarget(bindingSource, bindingTarget, null));
+        return target.isPresent();
+    }
 
     public void bindToTargets(BindingsTarget bindingsTarget) {
         bindingsTarget.getBindingTargets().forEach(this::bindToTarget);
+    }
+    public void bindToSources(BindingsSource bindingsSource) {
+        bindingsSource.getBindingSources().forEach(this::bindToSource);
     }
 
     public boolean bindingSourceSupportsTarget(BindingSource<?> bindingSource, BindingTarget<?> bindingTarget) {

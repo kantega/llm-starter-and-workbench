@@ -7,7 +7,7 @@ A good place to start is the [Simple chat view](no.kantega.llm.fx.SimpleChatView
 The [Streaming chat models view](no.kantega.llm.fx.StreamingChatLanguageModelsView:/views/no.kantega.llm.fx.StreamingChatLanguageModelsView.md) shows a list of available LLMs that support streaming responses (so the user doesn't have to wait for a complete one). If the list is empty, you'll need to create a (connector to a) new LLM first. The process depends in the source of the LLM, e.g. with [Ollama](https://ollama.com/), it is as follows:
 
 1. Download Ollama from their [download page](https://ollama.com/download), install and start it. Ollama runs in the background, and may be controlled by a Command Line Interface (CLI).
-3. Download (pull) one or more of the available models, e.g. `llama3` with the command `ollama pull llama3` (in the terminal)
+3. Download (pull) one or more of the available LLMs, e.g. `llama3` with the command `ollama pull llama3` (in the terminal).
 4. Open the [Ollama models view](no.kantega.llm.fx.OllamaModelsView:/views/no.kantega.llm.fx.OllamaModelsView.md), where already pulled models are shown.
 5. Select the one you want to use and click the **Create streaming chat model** button.
 6. The newly created LLM (connector) should now be shown in the [Streaming chat model view](no.kantega.llm.fx.StreamingChatLanguageModelsView:/views/no.kantega.llm.fx.StreamingChatLanguageModelsView.md)

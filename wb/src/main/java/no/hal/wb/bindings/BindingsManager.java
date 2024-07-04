@@ -36,6 +36,9 @@ public class BindingsManager {
         if (event.viewInfo().instance().controller() instanceof BindingsSource bindingsSource) {
             bindingsSources.add(bindingsSource);
             bindingController.addBindingSources(bindingsSource);
+            if (autoBindView) {
+                bindingController.bindToSources(bindingsSource);
+            }
         }
         if (event.viewInfo().instance().controller() instanceof BindingsTarget bindingsTarget) {
             bindingsTargets.add(bindingsTarget);

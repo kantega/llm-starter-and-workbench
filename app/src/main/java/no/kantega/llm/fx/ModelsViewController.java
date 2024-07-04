@@ -77,7 +77,10 @@ public abstract class ModelsViewController<T> implements BindingsSource {
             @Override
             public void modelAdded(ModelConfiguration<?> modelConfiguration, Object model) {
                 if (modelClass.isInstance(model)) {
-                    Platform.runLater(() -> models.add(modelClass.cast(model)));
+                    Platform.runLater(() -> {
+                        models.add(modelClass.cast(model));
+                        autoSelect(modelsListView);
+                    });
                 }
             }
             @Override
@@ -85,9 +88,15 @@ public abstract class ModelsViewController<T> implements BindingsSource {
                 Platform.runLater(() -> models.remove(model));
             }
         });
-
         this.bindingSources = List.of(
             new BindingSource<T>(modelsListView, modelClass, FxBindings.selectedItemProperty(modelsListView, modelClass))
         );
+        autoSelect(modelsListView);
+    }
+
+    protected void autoSelect(ListView<T> modelsListView) {
+        if (modelsListView.getSelectionModel().isEmpty()) {
+            modelsListView.getSelectionModel().selectLast();
+        }
     }
 }

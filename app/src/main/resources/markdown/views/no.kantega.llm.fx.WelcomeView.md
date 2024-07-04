@@ -28,3 +28,7 @@ The info pages (like this one) have some limitation that should be noted. Links 
 A good place to start is try out a simple chat. This will introduce some basic concepts, such as `ChatLanguageModel`, `ChatMessage` and `ChatMemory` and the use of views for instantiating and selecting LLMs, chatting with the selected LLM and showing the message history.
 
 Go to [Simple chat](../tutorials/simple-chat.md).
+
+After this, you may explore *embeddings*, which are important within LLMs and is the basis for Retrieval Augmented Generation.
+
+Go to [Embeddings](../tutorials/embeddings.md).
