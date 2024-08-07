@@ -5,7 +5,10 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.net.MalformedURLException;
 import java.net.URI;
+import java.net.URISyntaxException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
@@ -19,6 +22,8 @@ import com.fasterxml.jackson.databind.node.ValueNode;
 
 import jakarta.enterprise.context.Dependent;
 import jakarta.inject.Inject;
+import javafx.application.HostServices;
+import javafx.geometry.Insets;
 import javafx.scene.Node;
 import javafx.scene.control.Button;
 import javafx.scene.control.ContextMenu;
@@ -39,25 +44,43 @@ import one.jpro.platform.mdfx.extensions.ImageExtension;
 import one.jpro.platform.mdfx.impl.AdaptiveImage;
 
 @Dependent
-public class MarkdownViewController implements PathResolving, Configurable {
+public class MarkdownViewController implements Configurable {
     
     private String markdownString;
     private URI markdownResource;
 
     private StackPane content;
     private MarkdownView markdownView;
-    private WebView webView;
     private ContextMenu contextMenu;
     
     private Button forwardButton, backwardButton;
     
-    private PathResolver pathResolver;
+    @Inject
+    PathResolver pathResolver;
 
     @Inject Logger logger;
 
+    private static URI resolveUri(URI baseUri, String uriString) {
+        URI uri = URI.create(uriString);
+        if (uri.isAbsolute()) {
+            return uri;
+        } else if ("jar".equals(baseUri.getScheme())) {
+            try {
+                URL baseUrl = baseUri.toURL();
+                return new URL(baseUrl, uriString).toURI();
+            } catch (MalformedURLException | URISyntaxException exc) {
+                throw new RuntimeException(exc);
+            }
+        } else {
+            return baseUri.resolve(uri);
+        }
+    }
+
     public MarkdownViewController() {
         markdownView = new MarkdownView(markdownString, List.of(new ImageExtension((String) null, (url, view) -> {
-            Image img = new Image(resolveLink(url).toString(), false);
+            var actualUri = pathResolver.resolvePath(markdownResource);
+            var imageUri = resolveUri(actualUri, url);
+            Image img = new Image(imageUri.toString(), false);
             AdaptiveImage r = new AdaptiveImage(img);
             r.maxWidthProperty().bind(view.widthProperty());
             return r;
@@ -65,10 +88,11 @@ public class MarkdownViewController implements PathResolving, Configurable {
             @Override
             public void setLink(Node node, String link, String description) {
                 super.setLink(node, link, description);
-                node.getProperties().put("markdown-link", resolveLink(link));
+                node.getProperties().put("markdown-link", markdownResource.resolve(link));
                 node.getProperties().put("markdown-link-description", description);
             }
         };
+        markdownView.setPadding(new Insets(5));
         
         markdownView.setOnMouseClicked(mouseEvent -> {
             if (! contextMenuOpener.apply(mouseEvent)) {
@@ -113,57 +137,20 @@ public class MarkdownViewController implements PathResolving, Configurable {
         return content;
     }
 
-    @Override
-    public void setPathResolver(PathResolver pathResolver) {
-        this.pathResolver = pathResolver;
-        updateView();
-    }
-
-    private URI resolveLink(String link) {
-        return pathResolver.resolvePath(markdownResource).resolve(link);
-    }
-
     private void updateView() {
-        if (markdownResource.getScheme().startsWith("http")) {
-            if (webView == null) {
-                webView = new WebView();
-                VBox.setVgrow(webView, Priority.ALWAYS);
-                webView.setContextMenuEnabled(false);
-                webView.setOnMouseClicked(mouseEvent -> contextMenuOpener.apply(mouseEvent));
-                // webView.getEngine().locationProperty().subscribe(location -> {
-                //     if (history != null && location != null && (! location.equals(history.getLast().markdownResource.toString()))) {
-                //         pushHistory(URI.create(location));
-                //     }
-                // });
-                content.getChildren().add(1, webView);
+        if (markdownString == null) {
+            var actualResource = pathResolver.resolvePath(markdownResource);
+            logger.infof("Reading markup for %s from %s", markdownResource, actualResource);
+            StringBuilder markdown = new StringBuilder();
+            try (InputStream input = actualResource.toURL().openStream();
+                BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
+                reader.lines().forEach(line -> markdown.append(line).append("\n"));        
+            } catch (Exception e) {
+                appendException(e, markdownResource, markdown);
             }
-            markdownView.setVisible(false);
-            webView.setVisible(true);
-            logger.infof("Opening %s in web view", markdownResource);
-            webView.getEngine().load(markdownResource.toString());
-            return;
-        } else {
-            markdownView.setVisible(true);
-            if (webView != null) {
-                webView.setVisible(false);
-            }
-            if (markdownString == null) {
-                if (pathResolver == null) {
-                    return;
-                }
-                var actualResource = pathResolver.resolvePath(markdownResource);
-                logger.infof("Reading markup for %s from %s", markdownResource, actualResource);
-                StringBuilder markdown = new StringBuilder();
-                try (InputStream input = actualResource.toURL().openStream();
-                    BufferedReader reader = new BufferedReader(new InputStreamReader(input))) {
-                    reader.lines().forEach(line -> markdown.append(line).append("\n"));        
-                } catch (Exception e) {
-                    appendException(e, markdownResource, markdown);
-                }
-                markdownString = markdown.toString();
-            }
-            markdownView.setMdString(markdownString);
+            markdownString = markdown.toString();
         }
+        markdownView.setMdString(markdownString);
     }
 
     private void appendException(Exception e, URI source, StringBuilder markdownBuffer) {
@@ -205,16 +192,21 @@ public class MarkdownViewController implements PathResolving, Configurable {
         forwardButton.setDisable(historyPosition >= history.size() - 1);
     }
 
+    @Inject
+    HostServices hostServices;
+
+    protected boolean shouldOpenInBrowser(URI link) {
+        return link.getScheme() != null && link.getScheme().startsWith("http");
+    }
+
     private void navigateTo(URI link) {
         logger.infof("Navigating to %s", link);
-        if (link.getScheme().startsWith("http")) {
-            ClipboardContent content = new ClipboardContent();
-            content.putString(link.toString());
-            content.putUrl(link.toString());
-            Clipboard.getSystemClipboard().setContent(content);
+        if (shouldOpenInBrowser(link)) {
+            hostServices.showDocument(link.toString());
+        } else {
+            pushHistory(link);
+            navigate(1);
         }
-        pushHistory(link);
-        navigate(1);
     }
 
     private void pushHistory(URI link) {

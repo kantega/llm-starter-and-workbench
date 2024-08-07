@@ -1,6 +1,5 @@
 package no.kantega.llm.fx;
 
-import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.BiConsumer;
@@ -24,16 +23,19 @@ import javafx.beans.property.SimpleObjectProperty;
 import javafx.fxml.FXML;
 import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
+import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextArea;
 import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
+import no.hal.fx.bindings.BindingSource;
 import no.hal.fx.bindings.BindingTarget;
+import no.hal.fx.bindings.BindingsSource;
 import no.hal.fx.bindings.BindingsTarget;
 import no.kantega.llm.fx.IngestorViewController.TextSegmentEmbeddings;
 
 @Dependent
-public class EmbeddingsSearchViewController implements BindingsTarget {
+public class EmbeddingsSearchViewController implements BindingsTarget, BindingsSource {
 
     @FXML
     TextArea embeddingsText;
@@ -52,6 +54,13 @@ public class EmbeddingsSearchViewController implements BindingsTarget {
     @Override
     public List<BindingTarget<?>> getBindingTargets() {
         return this.bindingTargets;
+    }
+
+    private List<BindingSource<?>> bindingSources;
+
+    @Override
+    public List<BindingSource<?>> getBindingSources() {
+        return this.bindingSources;
     }
 
     private Property<TextSegmentEmbeddings> textSegmentEmbeddingsProperty = new SimpleObjectProperty<TextSegmentEmbeddings>();
@@ -74,9 +83,12 @@ public class EmbeddingsSearchViewController implements BindingsTarget {
         embeddingsLinearSearchAction.textProperty().bind(Bindings.createStringBinding(() -> searchActionLabel(labelAdapter, embeddingsLinearSearchActionTextFormat), textSegmentEmbeddingsProperty));
 
         AdapterListView.adapt(this.matchesListView, CompositeLabelAdapter.of(this.labelAdapters));
+        this.matchesListView.getSelectionModel().setSelectionMode(SelectionMode.MULTIPLE);
 
         this.bindingTargets = List.of(
             new BindingTarget<TextSegmentEmbeddings>(embeddingsSearchAction, TextSegmentEmbeddings.class, textSegmentEmbeddingsProperty)
+        );
+        this.bindingSources = List.of(
         );
     }
 

@@ -45,6 +45,11 @@ public class ViewProviders {
     }
 
     @Produces
+    ViewProvider promptView() throws IOException {
+        return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.PromptView", "Prompt", "Chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/PromptView.fxml"){};
+    }
+
+    @Produces
     ViewProvider simpleChatView() throws IOException {
         return new FxmlViewProvider(new ViewProvider.Info("no.kantega.llm.fx.SimpleChatView", "Simple chat", "Chat"), fxmlLoaderProvider, "/no/kantega/llm/fx/SimpleChatView.fxml"){};
     }

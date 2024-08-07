@@ -62,6 +62,10 @@
             <version>0.3.1</version>
         </dependency>
         <dependency>
+            <groupId>io.quarkiverse.fx</groupId>
+            <artifactId>quarkus-fx</artifactId>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
         </dependency>

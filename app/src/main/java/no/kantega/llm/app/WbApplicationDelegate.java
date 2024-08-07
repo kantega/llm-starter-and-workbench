@@ -6,7 +6,7 @@ import java.util.List;
 import org.eclipse.microprofile.config.inject.ConfigProperty;
 import org.jboss.logmanager.Logger;
 
-import io.quarkiverse.fx.FxStartupEvent;
+import io.quarkiverse.fx.FxPostStartupEvent;
 import io.quarkus.runtime.StartupEvent;
 import jakarta.enterprise.event.Observes;
 import jakarta.inject.Inject;
@@ -25,7 +25,7 @@ public class WbApplicationDelegate {
     @Inject
     WbController wbController;
 
-    public void start(@Observes FxStartupEvent fxStartupEvent) throws IOException {
+    public void start(@Observes FxPostStartupEvent fxStartupEvent) throws IOException {
         var fxmlLoader = fxmlLoaderProvider.get();
         fxmlLoader.setLocation(getClass().getResource("Wb.fxml"));
         Scene scene = fxmlLoader.load();

@@ -71,6 +71,11 @@
             <artifactId>llmwb-huggingface</artifactId>
             <version>DEV-SNAPSHOT</version>                    
         </dependency>
+        <dependency>
+            <groupId>no.kantega.llmwb</groupId>
+            <artifactId>llmwb-prompthubdeepsetai</artifactId>
+            <version>DEV-SNAPSHOT</version>                    
+        </dependency>
 
         <dependency>
             <groupId>org.openjfx</groupId>
@@ -81,13 +86,17 @@
             <artifactId>javafx-fxml</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.fasterxml.woodstox</groupId>
+            <artifactId>woodstox-core</artifactId>
+            <version>6.5.1</version>
+        </dependency>
+        <dependency>
             <groupId>io.quarkus</groupId>
             <artifactId>quarkus-arc</artifactId>
         </dependency>
         <dependency>
             <groupId>io.quarkiverse.fx</groupId>
             <artifactId>quarkus-fx</artifactId>
-            <version>0.4.1</version>
         </dependency>
         <dependency>
             <groupId>com.github.crawler-commons</groupId>

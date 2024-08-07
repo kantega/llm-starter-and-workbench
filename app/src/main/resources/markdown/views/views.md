@@ -12,11 +12,11 @@ Here are all the available views:
 
 * [Streaming chat models view](no.kantega.llm.fx.StreamingChatLanguageModelView.md) - lists all available streaming chat models
 
-* [Ollama models view](no.kantega.llm.fx.OllamaModelsView:/views/no.kantega.llm.fx.OllamaModelsView.md) - create new ollama chat models
+* [Ollama models view](no.kantega.llm.fx.OllamaModelsView:/markdown/views/no.kantega.llm.fx.OllamaModelsView.md) - create new ollama chat models
 
-* [OpenAi models view](no.kantega.llm.fx.OpenaiChatModelsView:/views/no.kantega.llm.fx.OpenaiChatModelsView.md) - create new open ai chat models
+* [OpenAi models view](no.kantega.llm.fx.OpenaiChatModelsView:/markdown/views/no.kantega.llm.fx.OpenaiChatModelsView.md) - create new open ai chat models
 
-* [Hugging face models view](no.kantega.llm.fx.HuggingfaceModelView:/views/no.kantega.llm.fx.HuggingfaceModelView.md) - create new hugging face chat models
+* [Hugging face models view](no.kantega.llm.fx.HuggingfaceModelView:/markdown/views/no.kantega.llm.fx.HuggingfaceModelView.md) - create new hugging face chat models
 
 * [Simple chat view](no.kantega.llm.fx.SimpleChatView.md) - chat with a (streaming) chat model
 

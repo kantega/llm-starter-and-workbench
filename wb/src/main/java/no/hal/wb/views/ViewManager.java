@@ -33,8 +33,6 @@ import no.hal.wb.views.ViewModel.ContainerItem;
 import no.hal.wb.views.ViewModel.Item;
 import no.hal.wb.views.markdown.MarkdownViewController;
 import no.hal.wb.views.markdown.MarkdownViewProvider;
-import no.hal.wb.views.markdown.PathResolver;
-import no.hal.wb.views.markdown.PathResolving;
 
 /*
  * Based on https://github.com/panemu/tiwulfx-dock
@@ -45,7 +43,7 @@ import no.hal.wb.views.markdown.PathResolving;
  */
 
 @ApplicationScoped
-public class ViewManager implements Configurable, PathResolver {
+public class ViewManager implements Configurable {
     
     @Inject
     BeanManager beanManager;
@@ -149,9 +147,6 @@ public class ViewManager implements Configurable, PathResolver {
     private ViewInfo addView(ViewProvider viewProvider, String instanceId, String viewTitle, JsonNode configuration) {
         ViewProvider.Instance instance = viewProvider.createView(configuration);
         // TODO: should this rather be handled with injection?
-        if (instance.controller() instanceof PathResolving pathResolving) {
-            pathResolving.setPathResolver(this);
-        }
         var tab = new DetachableTab(viewTitle, instance.viewNode());
         var viewInfo = new ViewInfo(viewProvider.getViewInfo(), instanceId, instance, tab);
         tab.setOnClosed(event -> removeView(viewInfo));
@@ -217,23 +212,20 @@ public class ViewManager implements Configurable, PathResolver {
         return Optional.of(menuItem);
     }
 
-    // PathResolver
-
-    @Override
     public URI resolvePath(URI path) {
         var viewProvider = findViewProvider(path.getScheme()).orElse(null);
         if (viewProvider == null) {
             return path;
         }
         try {
-            var url = viewProvider.getClass().getResource("/markdown" + path.getPath());
+            var url = viewProvider.getClass().getResource(path.getPath());
             return url != null ? url.toURI() : null;
         } catch (URISyntaxException e) {
             return null;
         }
     }
 
-    public final static String VIEW_INFO_PATH_FORMAT = "%1$s:/views/%1$s.md"; // takes only one argument, the view provider id
+    public final static String VIEW_INFO_PATH_FORMAT = "%1$s:/markdown/views/%1$s.md"; // takes only one argument, the view provider id
 
     private Optional<MenuItem> createInfoMenuItem(ViewProvider viewProvider, ViewInfo viewInfo) {
         var viewProviderId = providerId(viewProvider.viewProviderId());

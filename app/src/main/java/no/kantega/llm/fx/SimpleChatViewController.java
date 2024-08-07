@@ -10,6 +10,7 @@ import dev.langchain4j.memory.ChatMemory;
 import dev.langchain4j.memory.chat.MessageWindowChatMemory;
 import dev.langchain4j.model.chat.ChatLanguageModel;
 import dev.langchain4j.model.chat.StreamingChatLanguageModel;
+import dev.langchain4j.model.input.Prompt;
 import dev.langchain4j.service.AiServices;
 import jakarta.enterprise.context.Dependent;
 import jakarta.enterprise.inject.Instance;
@@ -69,6 +70,8 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
     @Inject
     Instance<LabelAdapter<?>> labelAdapters;
 
+    private Property<Prompt> promptProperty = new SimpleObjectProperty<Prompt>();
+
     private Property<ChatLanguageModel> chatModelProperty = new SimpleObjectProperty<ChatLanguageModel>();
     private Property<StreamingChatLanguageModel> streamingChatModelProperty = new SimpleObjectProperty<StreamingChatLanguageModel>();
         
@@ -125,6 +128,12 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
 
         LabelAdapter<Object> labelAdapter = CompositeLabelAdapter.of(this.labelAdapters);
 
+        promptProperty.subscribe(prompt -> {
+            if (prompt != null) {
+                userMessageText.setText(prompt.text());
+            }
+        });
+
         String sendUserMessageActionTextFormat = sendUserMessageAction.getText();
         chatModelProperty.subscribe(cm -> {
             updateChatbotAgent(cm);
@@ -140,6 +149,7 @@ public class SimpleChatViewController extends AbstractChatViewController impleme
         systemPromptText.textProperty().subscribe(text -> handleRestartChat());
 
         bindingTargets = List.of(
+            new BindingTarget<Prompt>(userMessageText, Prompt.class, promptProperty),
             new BindingTarget<ChatLanguageModel>(sendUserMessageAction, ChatLanguageModel.class, chatModelProperty),
             new BindingTarget<StreamingChatLanguageModel>(sendUserMessageAction, StreamingChatLanguageModel.class, streamingChatModelProperty)
         );

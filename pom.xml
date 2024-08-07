@@ -11,10 +11,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 
-        <quarkus.version>3.6.4</quarkus.version>
-        <langchain4j.version>0.30.0</langchain4j.version>
+        <quarkus.version>3.13.0</quarkus.version>
+        <langchain4j.version>0.33.0</langchain4j.version>
         <compiler-plugin.version>3.12.1</compiler-plugin.version>
-        <maven.compiler.release>17</maven.compiler.release>
+        <maven.compiler.release>21</maven.compiler.release>
     
         <javafx.version>21.0.1</javafx.version>
     </properties>
@@ -29,6 +29,7 @@
         <module>tables</module>
         <module>janino</module>
         <module>mvel</module>
+        <module>prompthubdeepsetai</module>
         <module>app</module>
     </modules>
 
@@ -40,6 +41,11 @@
                 <version>${quarkus.version}</version>
                 <type>pom</type>
                 <scope>import</scope>
+            </dependency>
+            <dependency>
+                <groupId>io.quarkiverse.fx</groupId>
+                <artifactId>quarkus-fx</artifactId>
+                <version>0.5.3</version>
             </dependency>
             <dependency>
                 <groupId>dev.langchain4j</groupId>
@@ -114,7 +120,7 @@
                 <plugin>
                     <groupId>io.smallrye</groupId>
                     <artifactId>jandex-maven-plugin</artifactId>
-                    <version>3.1.6</version>
+                    <version>3.2.1</version>
                     <executions>
                         <execution>
                         <id>make-index</id>

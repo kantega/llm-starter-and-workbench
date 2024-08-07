@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.control.Label?>
+<?import javafx.scene.control.ListView?>
+<?import javafx.scene.control.TitledPane?>
+<?import javafx.scene.control.TextArea?>
+<?import javafx.scene.control.TextField?>
+<?import javafx.scene.layout.VBox?>
+
+<VBox xmlns:fx="http://javafx.com/fxml" fx:controller="no.kantega.llm.fx.PromptViewController">
+    <Label text="Prompt templates:"/>
+    <ListView fx:id="templatesListView"/>
+    <Label text="Prompt template:"/>
+    <TextArea fx:id="templateString" prefRowCount="5"/>
+    <TitledPane text="Variables" collapsible="false">
+        <VBox fx:id="variableValuesPane">
+        </VBox>
+    </TitledPane>
+    <Label text="Prompt:"/>
+    <TextArea fx:id="promptString" prefRowCount="8"/>
+</VBox>

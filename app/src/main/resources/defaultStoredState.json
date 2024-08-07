@@ -3,7 +3,7 @@
         "type" : "view",
         "id" : "no.kantega.llm.fx.WelcomeView#0",
         "storedstate" : {
-          "markdownResource" : "no.kantega.llm.fx.WelcomeView:/views/no.kantega.llm.fx.WelcomeView.md"
+          "markdownResource" : "no.kantega.llm.fx.WelcomeView:/markdown/views/no.kantega.llm.fx.WelcomeView.md"
         }
     }
 ]

@@ -4,15 +4,15 @@ A key part of large language models (LLMs) and Retrieval Augmented Generation (R
 
 ## Connect to an embedding model
 
-The [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/views/no.kantega.llm.fx.EmbeddingModelsView.md) shows a list of available embedding models. It includes a default embedding model, a commonly used one from OpenAI, and you can also create (a connector to) one running on Ollama, as follows:
+The [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/markdown/views/no.kantega.llm.fx.EmbeddingModelsView.md) shows a list of available embedding models. It includes a default embedding model, a commonly used one from OpenAI, and you can also create (a connector to) one running on Ollama, as follows:
 
 1. Download Ollama from their [download page](https://ollama.com/download), install and start it. Ollama runs in the background, and may be controlled by a Command Line Interface (CLI).
 2. Download (pull) one or more of the available embedding models, e.g. `nomic-embed-text` with the command `ollama pull nomic-embed-text` (in the terminal).
-3. Open the [Ollama models view](no.kantega.llm.fx.OllamaModelsView:/views/no.kantega.llm.fx.OllamaModelsView.md), where already pulled models are shown.
+3. Open the [Ollama models view](no.kantega.llm.fx.OllamaModelsView:/markdown/views/no.kantega.llm.fx.OllamaModelsView.md), where already pulled models are shown.
 4. Select the one you want to use and click the **Create embedding model** button.
-5. The newly created embedding model should now be shown in the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/views/no.kantega.llm.fx.EmbeddingModelsView.md).
+5. The newly created embedding model should now be shown in the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/markdown/views/no.kantega.llm.fx.EmbeddingModelsView.md).
 
-After selecting an **EmbeddingModel** in the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/views/no.kantega.llm.fx.EmbeddingModelsView.md), you can try it out in the [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/views/no.kantega.llm.fx.EmbeddingsScoreView.md).
+After selecting an **EmbeddingModel** in the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/markdown/views/no.kantega.llm.fx.EmbeddingModelsView.md), you can try it out in the [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/markdown/views/no.kantega.llm.fx.EmbeddingsScoreView.md).
 
 ## Embedding similarity
 
@@ -28,11 +28,11 @@ Metric values depend on the embedding model and the embedding model is the resul
 
 ## The embeddings score view
 
-To get a sense of the behavior of embeddings and metrics, the [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/views/no.kantega.llm.fx.EmbeddingsScoreView.md) allows you to enter a *search* text fragment (words, phrases or sentences) and one or more *candidate* text fragments, and compute and rank the embeddings.
+To get a sense of the behavior of embeddings and metrics, the [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/markdown/views/no.kantega.llm.fx.EmbeddingsScoreView.md) allows you to enter a *search* text fragment (words, phrases or sentences) and one or more *candidate* text fragments, and compute and rank the embeddings.
 
 The search text is entered in the upper text area, while the candidates are entered as separate lines in the lower text area. The score button should indicate the active embedding model, and clicking it computes scores and sorts the results with the best matches first.
 
-The screenshot below shows the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/views/no.kantega.llm.fx.EmbeddingModelsView.md) (top left), [Ollama models view](no.kantega.llm.fx.OllamaModelsView:/views/no.kantega.llm.fx.OllamaModelsView.md) (bottom left), and [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/views/no.kantega.llm.fx.EmbeddingsScoreView.md) (right). The user has created several embedding models (running on Ollama), selected one, entered a search phrase and triggered computation of the scores.
+The screenshot below shows the [Embedding models view](no.kantega.llm.fx.EmbeddingModelsView:/markdown/views/no.kantega.llm.fx.EmbeddingModelsView.md) (top left), [Ollama models view](no.kantega.llm.fx.OllamaModelsView:/markdown/views/no.kantega.llm.fx.OllamaModelsView.md) (bottom left), and [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/markdown/views/no.kantega.llm.fx.EmbeddingsScoreView.md) (right). The user has created several embedding models (running on Ollama), selected one, entered a search phrase and triggered computation of the scores.
 
 ![](embeddings-score-view.png)
 
@@ -48,7 +48,7 @@ While you cannot use the embedding model and similarity to find the answer to a 
 
 ## The URI documents view
 
-The [URI documents view](no.kantega.llm.fx.UriDocumentsView:/views/no.kantega.llm.fx.UriDocumentsView) is used for locating and fetching document collections. The view consists of two parts.
+The [URI documents view](no.kantega.llm.fx.UriDocumentsView:/markdown/views/no.kantega.llm.fx.UriDocumentsView) is used for locating and fetching document collections. The view consists of two parts.
 
 In the upper part, you identify a document collection, either by entering an URI pointing to a sitemap.xml and clicking the **Scan**-button, or by selecting a local folder containing the documents. The list will be populated with the URIs or paths for the found documents. You can filter the list based on path content or file ending. Note that you can further limit the set of documents to fetch by manually selecting specific ones in the list.
 
@@ -62,11 +62,11 @@ In the screenshot below, the user has selected the document parser for `Plain te
 
 ![](uri-documents-view-lower-part.png)
 
-The loaded documents are shown in a list, which can be used as input by views that need **Documents**, e.g. the [Ingestor view](no.kantega.llm.fx.IngestorView:/views/no.kantega.llm.fx.IngestorView).
+The loaded documents are shown in a list, which can be used as input by views that need **Documents**, e.g. the [Ingestor view](no.kantega.llm.fx.IngestorView:/markdown/views/no.kantega.llm.fx.IngestorView).
 
 ## The ingestor view
 
-The [Ingestor view](no.kantega.llm.fx.IngestorView:/views/no.kantega.llm.fx.IngestorView) takes an **EmbeddingModel** and a set of **Documents** as input, splits them into fragments and computes their embeddings.
+The [Ingestor view](no.kantega.llm.fx.IngestorView:/markdown/views/no.kantega.llm.fx.IngestorView) takes an **EmbeddingModel** and a set of **Documents** as input, splits them into fragments and computes their embeddings.
 
 The splitting part has two options, the maximum size of the fragments and the size of the overlap between fragments. After performing the splitting, you can review the result (and optionally select a subset of the fragments), befoire computing the embeddings. Note that computing embeddings may take some time.
 
@@ -74,8 +74,8 @@ In the screenshot below, the user has used the default options and split the 299
 
 ![](ingestor-view.png)
 
-The embeddings may be used as input by views that need **TextSegmentEmbeddings**, e.g. the [Embeddings search view](no.kantega.llm.fx.EmbeddingsSearchView:/views/no.kantega.llm.fx.EmbeddingsSearchView.md) or the [Rag chat view](no.kantega.llm.fx.RagChatView:/views/no.kantega.llm.fx.RagChatView.md).
+The embeddings may be used as input by views that need **TextSegmentEmbeddings**, e.g. the [Embeddings search view](no.kantega.llm.fx.EmbeddingsSearchView:/markdown/views/no.kantega.llm.fx.EmbeddingsSearchView.md) or the [Rag chat view](no.kantega.llm.fx.RagChatView:/markdown/views/no.kantega.llm.fx.RagChatView.md).
 
 ## The embeddings search view
 
-The [Embeddings search view](no.kantega.llm.fx.EmbeddingsSearchView:/views/no.kantega.llm.fx.EmbeddingsSearchView.md) is similar to the [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/views/no.kantega.llm.fx.EmbeddingsScoreView.md), in that it allows the user to search among and rank candidate fragments. But now the search is done among text fragments from document collections, instead from manually entered text, as provided by the [URI documents](no.kantega.llm.fx.UriDocumentsView:/views/no.kantega.llm.fx.UriDocumentsView) and [Ingestor](no.kantega.llm.fx.IngestorView:/views/no.kantega.llm.fx.IngestorView) views.
+The [Embeddings search view](no.kantega.llm.fx.EmbeddingsSearchView:/markdown/views/no.kantega.llm.fx.EmbeddingsSearchView.md) is similar to the [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView:/markdown/views/no.kantega.llm.fx.EmbeddingsScoreView.md), in that it allows the user to search among and rank candidate fragments. But now the search is done among text fragments from document collections, instead from manually entered text, as provided by the [URI documents](no.kantega.llm.fx.UriDocumentsView:/markdown/views/no.kantega.llm.fx.UriDocumentsView) and [Ingestor](no.kantega.llm.fx.IngestorView:/markdown/views/no.kantega.llm.fx.IngestorView) views.
