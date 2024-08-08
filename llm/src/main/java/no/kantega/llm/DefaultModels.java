@@ -13,6 +13,6 @@ public class DefaultModels {
 
     @Produces
     List<ModelConfiguration<EmbeddingModel>> getEmbeddingModel() {
-        return List.of(new Named<EmbeddingModel>("Minimal", new AllMiniLmL6V2EmbeddingModel()));
+        return List.of(new Named<EmbeddingModel>("minimal", new AllMiniLmL6V2EmbeddingModel()));
     }
 }

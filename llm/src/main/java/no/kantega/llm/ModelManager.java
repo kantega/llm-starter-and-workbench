@@ -36,7 +36,6 @@ public class ModelManager {
     private <T> void registerModel(ModelConfiguration<T> modelConfiguration, T model) {
         models.put(modelConfiguration, model);
         modelConfigurations.put(model, modelConfiguration);
-        System.out.println("Registered model: " + modelConfiguration);
     }
 
     public <T> T registerModel(ModelConfiguration<T> modelConfiguration) {

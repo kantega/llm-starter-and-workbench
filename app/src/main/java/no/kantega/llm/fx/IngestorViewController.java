@@ -1,9 +1,13 @@
 package no.kantega.llm.fx;
 
+import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.jboss.logging.Logger;
+
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 import dev.langchain4j.data.document.Document;
 import dev.langchain4j.data.document.splitter.DocumentSplitters;
@@ -22,6 +26,7 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ListView;
 import javafx.scene.control.SelectionMode;
 import javafx.scene.control.TextField;
+import javafx.stage.FileChooser;
 import no.hal.fx.adapter.AdapterListView;
 import no.hal.fx.adapter.CompositeLabelAdapter;
 import no.hal.fx.adapter.LabelAdapter;
@@ -31,6 +36,7 @@ import no.hal.fx.bindings.BindingsSource;
 import no.hal.fx.bindings.BindingsTarget;
 import no.hal.fx.util.ActionProgressHelper;
 import no.hal.fx.util.CopyToClipboardActionCreator;
+import no.kantega.llm.ModelManager;
 import no.kantega.llm.fx.UriDocumentsViewController.Documents;
 
 @Dependent
@@ -44,8 +50,12 @@ public class IngestorViewController implements BindingsSource, BindingsTarget {
 
     @FXML
     Button ingestAction;
+
     @FXML
     Button embedAction;
+
+    @FXML
+    Button saveEmbeddingsAction;
 
     private String embedActionTextFormat;
 
@@ -108,6 +118,8 @@ public class IngestorViewController implements BindingsSource, BindingsTarget {
             }
             return sb.toString();
         });
+
+        allTextSegmentEmbeddingsProperty.subscribe(tse -> saveEmbeddingsAction.setDisable(tse == null || tse.textSegmentEmbeddings().isEmpty()));
 
         AdapterListView.adapt(this.textSegmentsListView, CompositeLabelAdapter.of(this.labelAdapters));
 
@@ -194,5 +206,76 @@ public class IngestorViewController implements BindingsSource, BindingsTarget {
                 return;
             }
         });
+    }
+
+    @Inject
+    ModelManager modelManager;
+
+    @Inject
+    ObjectMapper objectMapper;
+
+    private FileChooser fileChooser;
+
+    public record PersistedTextSegmentEmbeddings(String embeddingModelName, List<PersistedTextSegmentEmbedding> textSegmentEmbeddings) {
+    }
+    public record PersistedTextSegmentEmbedding(String segment, float[] embedding) {
+        static PersistedTextSegmentEmbedding from(TextSegmentEmbedding tse) {
+            return new PersistedTextSegmentEmbedding(tse.textSegment().text(), tse.embedding().vector());
+        }
+        TextSegmentEmbedding toTextSegmentEmbedding() {
+            return new TextSegmentEmbedding(TextSegment.from(segment()), Embedding.from(embedding()));
+        }
+    }
+
+    @FXML
+    void handleSaveEmbeddings() {
+        var textSegmentEmbeddings = allTextSegmentEmbeddingsProperty.getValue();
+        if (textSegmentEmbeddings == null) {
+            return;
+        }
+        if (fileChooser == null) {
+            fileChooser = new FileChooser();
+        }
+        var embeddingModelName = modelManager.getModelName(textSegmentEmbeddings.embeddingModel());
+        fileChooser.setTitle("Save %s embeddings".formatted(embeddingModelName));
+        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(embeddingModelName + " files", embeddingModelName));
+        File selectedFile = fileChooser.showSaveDialog(null);
+        if (! selectedFile.getName().endsWith("." + embeddingModelName)) {
+            selectedFile = new File(selectedFile.getAbsolutePath() + "." + embeddingModelName);
+        }
+        if (selectedFile != null) {
+            try {
+                objectMapper.writeValue(selectedFile, new PersistedTextSegmentEmbeddings(
+                    embeddingModelName,
+                    textSegmentEmbeddings.textSegmentEmbeddings().stream().map(PersistedTextSegmentEmbedding::from).toList()
+                ));
+            } catch (IOException exc) {
+                logger.warnf("Couldn't save text segment embeddings to %s: %s", selectedFile, exc);
+            }
+        }
+    }
+
+    @FXML
+    void handleLoadEmbeddings() {
+        if (fileChooser == null) {
+            fileChooser = new FileChooser();
+        }
+        var embeddingModel = embeddingModelProperty.getValue();
+        var embeddingModelName = modelManager.getModelName(embeddingModel);
+        fileChooser.setTitle("Open %s embeddings".formatted(embeddingModelName));
+        fileChooser.setSelectedExtensionFilter(new FileChooser.ExtensionFilter(embeddingModelName + " files", embeddingModelName));
+        File selectedFile = fileChooser.showOpenDialog(null);
+        if (selectedFile != null) {
+            try {
+                var persistedEmbeddings = objectMapper.readValue(selectedFile, PersistedTextSegmentEmbeddings.class);
+                textSegmentsListView.getItems().setAll(persistedEmbeddings.textSegmentEmbeddings().stream().map(ptse -> TextSegment.from(ptse.segment())).toList());
+                allTextSegmentEmbeddingsProperty.setValue(new TextSegmentEmbeddings(
+                    embeddingModel,
+                    persistedEmbeddings.textSegmentEmbeddings().stream().map(PersistedTextSegmentEmbedding::toTextSegmentEmbedding).toList()
+                ));
+            } catch (IOException exc) {
+                logger.warnf("Couldn't load text segment embeddings from %s: %s", selectedFile, exc);
+            }
+        }
     }
 }

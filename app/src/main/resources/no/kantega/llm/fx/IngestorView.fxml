@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <?import javafx.scene.control.Button?>
+<?import javafx.scene.control.Label?>
 <?import javafx.scene.control.TextField?>
 <?import javafx.scene.control.ListView?>
 <?import javafx.scene.layout.VBox?>
@@ -12,8 +13,13 @@
         <TextField fx:id="segmentOverlapText" text="20" promptText="Segment overlap"/>
         <Button fx:id="ingestAction" text="Ingest %s documents" onAction="#handleIngest"/>
     </HBox>
+    <Label text="Text segments"/>
     <ListView fx:id="textSegmentsListView" VBox.vgrow="ALWAYS"/>
     <HBox>
         <Button fx:id="embedAction" text="Embed %s segments with %s" onAction="#handleEmbed"/>
+    </HBox>
+    <HBox>
+        <Button fx:id="saveEmbeddingsAction" text="Save text segments with embeddings..." onAction="#handleSaveEmbeddings"/>
+        <Button fx:id="openEmbeddingsAction" text="Load text segments and embeddings..." onAction="#handleLoadEmbeddings"/>
     </HBox>
 </VBox>
