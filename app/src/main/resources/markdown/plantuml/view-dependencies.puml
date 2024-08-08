@@ -7,6 +7,7 @@ component ChatModelsView
 component StreamingChatModelsView
 
 component SimpleChatView
+component PromptView
 component RagChatView
 
 component ChatMemoryView
@@ -20,6 +21,7 @@ OpenAiModelsView <.. StreamingChatModelsView : StreamingChatLanguageModel
 
 ChatModelsView <.. SimpleChatView : ChatLanguageModel
 StreamingChatModelsView <.. SimpleChatView : StreamingChatLanguageModel
+PromptView <.. "?" SimpleChatView : Prompt
 
 ChatModelsView <.. RagChatView : ChatLanguageModel
 StreamingChatModelsView <.. RagChatView : StreamingChatLanguageModel

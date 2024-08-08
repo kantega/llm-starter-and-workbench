@@ -20,6 +20,8 @@ Here are all the available views:
 
 * [Simple chat view](no.kantega.llm.fx.SimpleChatView.md) - chat with a (streaming) chat model
 
+* [Prompt view](no.kantega.llm.fx.PromptView.md) - try out various task-specific prompts (templates)
+
 * [Chat memory view](no.kantega.llm.fx.ChatMemoryView.md) - shows the messages in a chat memory
 
 * [Embeddings score view](no.kantega.llm.fx.EmbeddingsScoreView.md) - compute and compare (the similarity of) embeddings
